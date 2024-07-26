@@ -1,0 +1,4 @@
+[submodule "src/include/imgui"]
+	path = src/include/imgui
+	url = https://github.com/enriavil1/imgui-cmake.git
+	branch = docking
