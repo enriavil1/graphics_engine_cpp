@@ -2,3 +2,6 @@
 	path = src/include/imgui
 	url = https://github.com/enriavil1/imgui-cmake.git
 	branch = docking
+[submodule "src/include/glfw"]
+	path = src/include/glfw
+	url = https://github.com/glfw/glfw.git
