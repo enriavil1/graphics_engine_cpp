@@ -20,21 +20,22 @@ set(GLFW_BUILD_EXAMPLES
     OFF
     CACHE BOOL "" FORCE)
 
-add_executable(${PROJECT_NAME} main.cpp)
+file(GLOB_RECURSE SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/lib/**/*.cpp")
+add_library(LibsModule ${SOURCE_FILES})
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/include/glfw EXCLUDE_FROM_ALL)
-target_link_libraries(${PROJECT_NAME} PUBLIC glfw)
-
-# file(GLOB_RECURSE SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/lib/**/*.cpp
-# add_library(LibsModule ${SOURCE_FILES})
+target_link_libraries(LibsModule PUBLIC glfw)
 
 find_package(OpenGL REQUIRED)
-target_link_libraries(${PROJECT_NAME} PUBLIC OpenGL::GL)
+target_link_libraries(LibsModule PUBLIC OpenGL::GL)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/include/imgui)
-target_link_libraries(${PROJECT_NAME} PUBLIC imgui)
+target_link_libraries(LibsModule PUBLIC imgui)
+
+add_executable(${PROJECT_NAME} main.cpp)
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
+target_link_libraries(${PROJECT_NAME} PUBLIC LibsModule)
 
 target_include_directories(
   ${PROJECT_NAME}

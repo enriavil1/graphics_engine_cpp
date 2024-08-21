@@ -4,18 +4,34 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include <GLFW/glfw3.h>
-
 #include <iostream>
 #include <memory>
 #include <unistd.h>
+
+bool Window::m_is_running = false;
+
+ImVec4 Window::m_clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+std::unique_ptr<ImGuiIO> Window::m_io = nullptr;
+GLFWwindow *Window::m_window = nullptr;
+
+int Window::m_width = 1280;
+int Window::m_height = 720;
+
+void Window::set_window_width(int width) { Window::m_width = width; }
+void Window::set_window_height(int height) { Window::m_height = height; }
+void Window::set_window_clear_color(const ImVec4 &clear_color) {
+  Window::m_clear_color = clear_color;
+}
+
+ImGuiIO &Window::get_window_io() { return *Window::m_io; }
 
 void Window::glfw_sleep(int milliseconds) { usleep(milliseconds * 1000); }
 void Window::glfw_error_callback(int error, const char *description) {
   fprintf(stderr, "GLFW failed with error %d: %s\n", error, description);
 }
 
-bool Window::initialize(const ImGuiIO &io) {
+bool Window::initialize(const char *window_title) {
   glfwSetErrorCallback(glfw_error_callback);
   if (!glfwInit()) {
     return false;
@@ -32,9 +48,8 @@ bool Window::initialize(const ImGuiIO &io) {
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
   // Create window with graphics context
-  Window::m_window =
-      glfwCreateWindow(Window::m_width, Window::m_height,
-                       "Dear ImGui GLFW+OpenGL3 example", nullptr, nullptr);
+  Window::m_window = glfwCreateWindow(Window::m_width, Window::m_height,
+                                      window_title, nullptr, nullptr);
 
   if (Window::m_window == nullptr) {
     std::cerr << "Failed to initialize window" << std::endl;
@@ -48,6 +63,13 @@ bool Window::initialize(const ImGuiIO &io) {
   // set up dear imgui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
+
+  ImGuiIO &io = ImGui::GetIO();
+
+  (void)io;
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
   Window::m_io = std::make_unique<ImGuiIO>(io);
 
   ImGui::StyleColorsDark();
@@ -56,7 +78,6 @@ bool Window::initialize(const ImGuiIO &io) {
   ImGui_ImplGlfw_InitForOpenGL(Window::m_window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
 
-  auto show_another_window = false;
   return true;
 }
 

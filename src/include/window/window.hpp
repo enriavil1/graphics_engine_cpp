@@ -13,8 +13,14 @@ public:
   Window();
   ~Window();
 
-  static bool initialize(const ImGuiIO &io);
+  static bool initialize(const char *window_title);
   static void run();
+
+  static void set_window_height(int height);
+  static void set_window_width(int width);
+  static void set_window_clear_color(const ImVec4 &clear_color);
+
+  static ImGuiIO &get_window_io();
 
 private:
   static bool m_is_running;
