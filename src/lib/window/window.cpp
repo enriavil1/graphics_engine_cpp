@@ -1,19 +1,20 @@
 #include "../../include/window/window.hpp"
 
-#include <cstdio>
+#include "imgui.h"
+
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
 #include <iostream>
-#include <memory>
 #include <unistd.h>
+
+#include "../../include/Engine3D/Engine3D.hpp"
 
 bool Window::m_is_running = false;
 
 ImVec4 Window::m_clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-std::unique_ptr<ImGuiIO> Window::m_io = nullptr;
-GLFWwindow *Window::m_window = nullptr;
+GLFWwindow *Window::m_window;
 
 int Window::m_width = 1280;
 int Window::m_height = 720;
@@ -23,8 +24,6 @@ void Window::set_window_height(int height) { Window::m_height = height; }
 void Window::set_window_clear_color(const ImVec4 &clear_color) {
   Window::m_clear_color = clear_color;
 }
-
-ImGuiIO &Window::get_window_io() { return *Window::m_io; }
 
 void Window::glfw_sleep(int milliseconds) { usleep(milliseconds * 1000); }
 void Window::glfw_error_callback(int error, const char *description) {
@@ -37,7 +36,9 @@ bool Window::initialize(const char *window_title) {
     return false;
   }
 
+  // Mac specific versioning
   const char *glsl_version = "#version 150";
+
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 
@@ -69,8 +70,7 @@ bool Window::initialize(const char *window_title) {
   (void)io;
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
-  Window::m_io = std::make_unique<ImGuiIO>(io);
+  io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
   ImGui::StyleColorsDark();
 
@@ -87,6 +87,11 @@ void Window::process_events() {}
 
 void Window::run() {
   auto show_another_window = false;
+  auto &io = ImGui::GetIO();
+  engine3D::Engine engine;
+
+  double theta = 0.0;
+
   while (!glfwWindowShouldClose(m_window)) {
     glfwPollEvents();
     if (glfwGetWindowAttrib(m_window, GLFW_ICONIFIED) != 0) {
@@ -98,49 +103,23 @@ void Window::run() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+    ImGui::DockSpaceOverViewport();
 
     {
-      static float f = 0.0f;
-      static int counter = 0;
-
-      // Create a window called "Hello, world!" and
-      // append into it.
-      ImGui::Begin("Hello, world!");
-
-      // Display some text (you can use
-      // a format strings too)
-      ImGui::Text("This is some useful text.");
-      ImGui::Checkbox("Another Window", &show_another_window);
-
-      // Edit 1 float using a slider from 0.0f to 1.0f
-      ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-
-      // Edit 2 floats representing a color
-      ImGui::ColorEdit3("clear color",
-                        reinterpret_cast<float *>(&m_clear_color));
-
-      // Buttons return true when clicked (most
-      if (ImGui::Button("Button")) {
-        counter++;
-      }
-
-      ImGui::SameLine();
-      ImGui::Text("counter = %d", counter);
+      ImGui::Begin("Stats");
 
       ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-                  1000.0f / m_io->Framerate, m_io->Framerate);
+                  1000.0f / io.Framerate, io.Framerate);
       ImGui::End();
     }
 
-    if (show_another_window) {
-      // Pass a pointer to our bool variable (the
-      // window will have a closing button that will
-      // clear the bool when clicked)
+    {
+      ImGui::Begin("Draw Port");
+      auto dt = 1.0f / (io.Framerate * 8.0f);
+      theta += 1 * dt;
 
-      ImGui::Begin("Another Window", &show_another_window);
-      ImGui::Text("Hello from another window!");
-      if (ImGui::Button("Close Me"))
-        show_another_window = false;
+      engine.project(theta);
+
       ImGui::End();
     }
 
@@ -154,6 +133,13 @@ void Window::run() {
                  m_clear_color.z * m_clear_color.w, m_clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+      GLFWwindow *backup_current_context = glfwGetCurrentContext();
+      ImGui::UpdatePlatformWindows();
+      ImGui::RenderPlatformWindowsDefault();
+      glfwMakeContextCurrent(backup_current_context);
+    }
 
     glfwSwapBuffers(m_window);
   }
