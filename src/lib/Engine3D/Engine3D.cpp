@@ -1,5 +1,6 @@
 #include "../../../include/Engine3D/Engine3D.hpp"
 #include "imgui.h"
+#include <array>
 #include <cmath>
 
 using namespace engine3D;
@@ -60,9 +61,9 @@ void Engine::project(double theta) {
                                x_rotated_triangle.points[2], x_rotation_matrix);
 
     // offset the z axis
-    x_rotated_triangle.points[0].z += 3.0f;
-    x_rotated_triangle.points[1].z += 3.0f;
-    x_rotated_triangle.points[2].z += 3.0f;
+    for (Point &point : x_rotated_triangle.points) {
+      point.z += 3.0f;
+    }
 
     this->multiplyVectorMatrix(x_rotated_triangle.points[0],
                                projected_triangle.points[0], projection_matrix);
@@ -75,13 +76,18 @@ void Engine::project(double theta) {
     Engine::scaleTriangle(projected_triangle);
 
     const ImVec2 &window_pos = ImGui::GetWindowPos();
+    std::array<ImVec2, 3> drawing_points;
+    for (int i = 0; i < projected_triangle.points.size(); ++i) {
+      drawing_points[i] = projected_triangle.points[i].getImVec2(window_pos);
+    }
+
     ImVec2 point1 = projected_triangle.points[0].getImVec2(window_pos);
     ImVec2 point2 = projected_triangle.points[1].getImVec2(window_pos);
     ImVec2 point3 = projected_triangle.points[2].getImVec2(window_pos);
 
-    draw_list->AddLine(point1, point2, IM_COL32_WHITE);
-    draw_list->AddLine(point2, point3, IM_COL32_WHITE);
-    draw_list->AddLine(point3, point1, IM_COL32_WHITE);
+    draw_list->AddLine(drawing_points[0], drawing_points[1], IM_COL32_WHITE);
+    draw_list->AddLine(drawing_points[1], drawing_points[2], IM_COL32_WHITE);
+    draw_list->AddLine(drawing_points[2], drawing_points[0], IM_COL32_WHITE);
   }
 };
 

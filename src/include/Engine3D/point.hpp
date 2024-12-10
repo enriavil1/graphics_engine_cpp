@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <imgui.h>
 #include <vector>
 
@@ -23,7 +24,7 @@ struct Point {
 };
 
 struct Triangle {
-  Point points[3];
+  std::array<Point, 3> points;
 };
 
 struct Mesh {
