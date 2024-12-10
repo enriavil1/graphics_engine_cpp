@@ -13,28 +13,28 @@ public:
   inline Engine() {
     this->p_mesh_cube.triangles = {
         // South
-        {ImVec4(0, 0, 0, 0), ImVec4(0, 1, 0, 0), ImVec4(1, 1, 0, 0)},
-        {ImVec4(0, 0, 0, 0), ImVec4(1, 1, 0, 0), ImVec4(1, 0, 0, 0)},
+        {Point(0, 0, 0), Point(0, 1, 0), Point(1, 1, 0)},
+        {Point(0, 0, 0), Point(1, 1, 0), Point(1, 0, 0)},
 
         // East
-        {ImVec4(1, 0, 0, 0), ImVec4(1, 1, 0, 0), ImVec4(1, 1, 1, 0)},
-        {ImVec4(1, 0, 0, 0), ImVec4(1, 1, 1, 0), ImVec4(1, 0, 1, 0)},
+        {Point(1, 0, 0), Point(1, 1, 0), Point(1, 1, 1)},
+        {Point(1, 0, 0), Point(1, 1, 1), Point(1, 0, 1)},
 
         // North
-        {ImVec4(1, 0, 1, 0), ImVec4(1, 1, 1, 0), ImVec4(0, 1, 1, 0)},
-        {ImVec4(1, 0, 1, 0), ImVec4(0, 1, 1, 0), ImVec4(0, 0, 1, 0)},
+        {Point(1, 0, 1), Point(1, 1, 1), Point(0, 1, 1)},
+        {Point(1, 0, 1), Point(0, 1, 1), Point(0, 0, 1)},
 
         // West
-        {ImVec4(0, 0, 1, 0), ImVec4(0, 1, 1, 0), ImVec4(0, 1, 0, 0)},
-        {ImVec4(0, 0, 1, 0), ImVec4(0, 1, 0, 0), ImVec4(0, 0, 0, 0)},
+        {Point(0, 0, 1), Point(0, 1, 1), Point(0, 1, 0)},
+        {Point(0, 0, 1), Point(0, 1, 0), Point(0, 0, 0)},
 
         // Top
-        {ImVec4(0, 1, 0, 0), ImVec4(0, 1, 1, 0), ImVec4(1, 1, 1, 0)},
-        {ImVec4(0, 1, 0, 0), ImVec4(1, 1, 1, 0), ImVec4(1, 1, 0, 0)},
+        {Point(0, 1, 0), Point(0, 1, 1), Point(1, 1, 1)},
+        {Point(0, 1, 0), Point(1, 1, 1), Point(1, 1, 0)},
 
         // Bottom
-        {ImVec4(1, 0, 1, 0), ImVec4(0, 0, 1, 0), ImVec4(0, 0, 0, 0)},
-        {ImVec4(1, 0, 1, 0), ImVec4(0, 0, 0, 0), ImVec4(1, 0, 0, 0)},
+        {Point(1, 0, 1), Point(0, 0, 1), Point(0, 0, 0)},
+        {Point(1, 0, 1), Point(0, 0, 0), Point(1, 0, 0)},
     };
   };
 
@@ -45,8 +45,10 @@ public:
 private:
   Mesh p_mesh_cube;
 
-  void multiplyVectorMatrix(const ImVec4 &point, ImVec4 &output,
+  void multiplyVectorMatrix(const Point &point, Point &output,
                             const Matrix4x4 &m);
+
+  void scaleTriangle(Triangle &triangle);
 };
 
 } // namespace engine3D

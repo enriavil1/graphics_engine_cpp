@@ -72,26 +72,12 @@ void Engine::project(double theta) {
                                projected_triangle.points[2], projection_matrix);
 
     // scale projection point
-    auto scale_point = [](ImVec4 &point) {
-      point.x = (point.x + 1.0f) * ImGui::GetWindowWidth() * 0.5f;
-      point.y = (point.y + 1.0f) * ImGui::GetWindowHeight() * 0.5f;
-    };
+    Engine::scaleTriangle(projected_triangle);
 
-    scale_point(projected_triangle.points[0]);
-    scale_point(projected_triangle.points[1]);
-    scale_point(projected_triangle.points[2]);
-
-    // Scale into view
-
-    ImVec2 point1 =
-        ImVec2(projected_triangle.points[0].x + ImGui::GetWindowPos().x,
-               projected_triangle.points[0].y + ImGui::GetWindowPos().y);
-    ImVec2 point2 =
-        ImVec2(projected_triangle.points[1].x + ImGui::GetWindowPos().x,
-               projected_triangle.points[1].y + ImGui::GetWindowPos().y);
-    ImVec2 point3 =
-        ImVec2(projected_triangle.points[2].x + ImGui::GetWindowPos().x,
-               projected_triangle.points[2].y + ImGui::GetWindowPos().y);
+    const ImVec2 &window_pos = ImGui::GetWindowPos();
+    ImVec2 point1 = projected_triangle.points[0].getImVec2(window_pos);
+    ImVec2 point2 = projected_triangle.points[1].getImVec2(window_pos);
+    ImVec2 point3 = projected_triangle.points[2].getImVec2(window_pos);
 
     draw_list->AddLine(point1, point2, IM_COL32_WHITE);
     draw_list->AddLine(point2, point3, IM_COL32_WHITE);
@@ -99,7 +85,7 @@ void Engine::project(double theta) {
   }
 };
 
-void Engine::multiplyVectorMatrix(const ImVec4 &point, ImVec4 &output,
+void Engine::multiplyVectorMatrix(const Point &point, Point &output,
                                   const Matrix4x4 &m) {
 
   output.x = point.x * m.m[0][0] + point.y * m.m[1][0] + point.z * m.m[2][0] +
@@ -116,5 +102,12 @@ void Engine::multiplyVectorMatrix(const ImVec4 &point, ImVec4 &output,
     output.x /= w;
     output.y /= w;
     output.z /= w;
+  }
+};
+
+void Engine::scaleTriangle(Triangle &triangle) {
+  for (Point &point : triangle.points) {
+    point.x = (point.x + 1.0f) * ImGui::GetWindowWidth() * 0.5f;
+    point.y = (point.y + 1.0f) * ImGui::GetWindowHeight() * 0.5f;
   }
 };
