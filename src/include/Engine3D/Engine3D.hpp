@@ -42,6 +42,7 @@ public:
 
 private:
   Mesh p_mesh_cube;
+  // Actually make a camera not just a point
   Point camera = {.x = 0, .y = 0, .z = 0};
 
   void multiplyVectorMatrix(const Point &point, Point &output,
