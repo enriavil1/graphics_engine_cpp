@@ -1,6 +1,6 @@
 #pragma once
 
-#include "point.hpp"
+#include "triangle.hpp"
 
 namespace engine3D {
 
@@ -11,28 +11,28 @@ public:
   inline Engine() {
     this->p_mesh_cube.triangles = {
         // South
-        {Point(0, 0, 0), Point(0, 1, 0), Point(1, 1, 0)},
-        {Point(0, 0, 0), Point(1, 1, 0), Point(1, 0, 0)},
+        Triangle({Point(0, 0, 0), Point(0, 1, 0), Point(1, 1, 0)}),
+        Triangle({Point(0, 0, 0), Point(1, 1, 0), Point(1, 0, 0)}),
 
         // East
-        {Point(1, 0, 0), Point(1, 1, 0), Point(1, 1, 1)},
-        {Point(1, 0, 0), Point(1, 1, 1), Point(1, 0, 1)},
+        Triangle({Point(1, 0, 0), Point(1, 1, 0), Point(1, 1, 1)}),
+        Triangle({Point(1, 0, 0), Point(1, 1, 1), Point(1, 0, 1)}),
 
         // North
-        {Point(1, 0, 1), Point(1, 1, 1), Point(0, 1, 1)},
-        {Point(1, 0, 1), Point(0, 1, 1), Point(0, 0, 1)},
+        Triangle({Point(1, 0, 1), Point(1, 1, 1), Point(0, 1, 1)}),
+        Triangle({Point(1, 0, 1), Point(0, 1, 1), Point(0, 0, 1)}),
 
         // West
-        {Point(0, 0, 1), Point(0, 1, 1), Point(0, 1, 0)},
-        {Point(0, 0, 1), Point(0, 1, 0), Point(0, 0, 0)},
+        Triangle({Point(0, 0, 1), Point(0, 1, 1), Point(0, 1, 0)}),
+        Triangle({Point(0, 0, 1), Point(0, 1, 0), Point(0, 0, 0)}),
 
         // Top
-        {Point(0, 1, 0), Point(0, 1, 1), Point(1, 1, 1)},
-        {Point(0, 1, 0), Point(1, 1, 1), Point(1, 1, 0)},
+        Triangle({Point(0, 1, 0), Point(0, 1, 1), Point(1, 1, 1)}),
+        Triangle({Point(0, 1, 0), Point(1, 1, 1), Point(1, 1, 0)}),
 
         // Bottom
-        {Point(1, 0, 1), Point(0, 0, 1), Point(0, 0, 0)},
-        {Point(1, 0, 1), Point(0, 0, 0), Point(1, 0, 0)},
+        Triangle({Point(1, 0, 1), Point(0, 0, 1), Point(0, 0, 0)}),
+        Triangle({Point(1, 0, 1), Point(0, 0, 0), Point(1, 0, 0)}),
     };
   };
 
@@ -43,7 +43,7 @@ public:
 private:
   Mesh p_mesh_cube;
   // Actually make a camera not just a point
-  Point camera = {.x = 0, .y = 0, .z = 0};
+  Point camera;
 
   void multiplyVectorMatrix(const Point &point, Point &output,
                             const Matrix4x4 &m);
