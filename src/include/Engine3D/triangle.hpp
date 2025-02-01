@@ -9,20 +9,20 @@ namespace engine3D {
 
 class Triangle {
 public:
-  std::array<Point, 3> points;
+  std::array<Vec3d, 3> points;
 
   Triangle() {};
-  Triangle(std::array<Point, 3> points) : points(points) {};
+  Triangle(std::array<Vec3d, 3> points) : points(points) {};
 
-  Point getNormarl() {
+  Vec3d getNormarl() {
     // A line is a length between two points
-    Point lineA = Point(points[1].x - points[0].x, points[1].y - points[0].y,
+    Vec3d lineA = Vec3d(points[1].x - points[0].x, points[1].y - points[0].y,
                         points[1].z - points[0].z);
 
-    Point lineB = Point(points[2].x - points[0].x, points[2].y - points[0].y,
+    Vec3d lineB = Vec3d(points[2].x - points[0].x, points[2].y - points[0].y,
                         points[2].z - points[0].z);
 
-    Point normal = Point(lineA.y * lineB.z - lineA.z * lineB.y,
+    Vec3d normal = Vec3d(lineA.y * lineB.z - lineA.z * lineB.y,
                          lineA.z * lineB.x - lineA.x * lineB.z,
                          lineA.x * lineB.y - lineA.y * lineB.x);
 

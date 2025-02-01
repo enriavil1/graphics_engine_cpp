@@ -62,7 +62,7 @@ void Engine::project(double theta) {
                                zx_rotated_triangle.points[2],
                                x_rotation_matrix);
     // offset the z axis
-    for (Point &point : zx_rotated_triangle.points) {
+    for (Vec3d &point : zx_rotated_triangle.points) {
       point.z += 3.0f;
     }
 
@@ -99,7 +99,7 @@ void Engine::project(double theta) {
   }
 };
 
-void Engine::multiplyVectorMatrix(const Point &point, Point &output,
+void Engine::multiplyVectorMatrix(const Vec3d &point, Vec3d &output,
                                   const Matrix4x4 &m) {
 
   output.x =
@@ -120,7 +120,7 @@ void Engine::multiplyVectorMatrix(const Point &point, Point &output,
 };
 
 void Engine::scaleTriangle(Triangle &triangle) {
-  for (Point &point : triangle.points) {
+  for (Vec3d &point : triangle.points) {
     point.x = (point.x + 1.0f) * ImGui::GetWindowWidth() * 0.5f;
     point.y = (point.y + 1.0f) * ImGui::GetWindowHeight() * 0.5f;
   }

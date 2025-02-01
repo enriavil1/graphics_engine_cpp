@@ -11,28 +11,28 @@ public:
   inline Engine() {
     this->p_mesh_cube.triangles = {
         // South
-        Triangle({Point(0, 0, 0), Point(0, 1, 0), Point(1, 1, 0)}),
-        Triangle({Point(0, 0, 0), Point(1, 1, 0), Point(1, 0, 0)}),
+        Triangle({Vec3d(0, 0, 0), Vec3d(0, 1, 0), Vec3d(1, 1, 0)}),
+        Triangle({Vec3d(0, 0, 0), Vec3d(1, 1, 0), Vec3d(1, 0, 0)}),
 
         // East
-        Triangle({Point(1, 0, 0), Point(1, 1, 0), Point(1, 1, 1)}),
-        Triangle({Point(1, 0, 0), Point(1, 1, 1), Point(1, 0, 1)}),
+        Triangle({Vec3d(1, 0, 0), Vec3d(1, 1, 0), Vec3d(1, 1, 1)}),
+        Triangle({Vec3d(1, 0, 0), Vec3d(1, 1, 1), Vec3d(1, 0, 1)}),
 
         // North
-        Triangle({Point(1, 0, 1), Point(1, 1, 1), Point(0, 1, 1)}),
-        Triangle({Point(1, 0, 1), Point(0, 1, 1), Point(0, 0, 1)}),
+        Triangle({Vec3d(1, 0, 1), Vec3d(1, 1, 1), Vec3d(0, 1, 1)}),
+        Triangle({Vec3d(1, 0, 1), Vec3d(0, 1, 1), Vec3d(0, 0, 1)}),
 
         // West
-        Triangle({Point(0, 0, 1), Point(0, 1, 1), Point(0, 1, 0)}),
-        Triangle({Point(0, 0, 1), Point(0, 1, 0), Point(0, 0, 0)}),
+        Triangle({Vec3d(0, 0, 1), Vec3d(0, 1, 1), Vec3d(0, 1, 0)}),
+        Triangle({Vec3d(0, 0, 1), Vec3d(0, 1, 0), Vec3d(0, 0, 0)}),
 
         // Top
-        Triangle({Point(0, 1, 0), Point(0, 1, 1), Point(1, 1, 1)}),
-        Triangle({Point(0, 1, 0), Point(1, 1, 1), Point(1, 1, 0)}),
+        Triangle({Vec3d(0, 1, 0), Vec3d(0, 1, 1), Vec3d(1, 1, 1)}),
+        Triangle({Vec3d(0, 1, 0), Vec3d(1, 1, 1), Vec3d(1, 1, 0)}),
 
         // Bottom
-        Triangle({Point(1, 0, 1), Point(0, 0, 1), Point(0, 0, 0)}),
-        Triangle({Point(1, 0, 1), Point(0, 0, 0), Point(1, 0, 0)}),
+        Triangle({Vec3d(1, 0, 1), Vec3d(0, 0, 1), Vec3d(0, 0, 0)}),
+        Triangle({Vec3d(1, 0, 1), Vec3d(0, 0, 0), Vec3d(1, 0, 0)}),
     };
   };
 
@@ -43,9 +43,9 @@ public:
 private:
   Mesh p_mesh_cube;
   // Actually make a camera not just a point
-  Point camera;
+  Vec3d camera;
 
-  void multiplyVectorMatrix(const Point &point, Point &output,
+  void multiplyVectorMatrix(const Vec3d &point, Vec3d &output,
                             const Matrix4x4 &m);
 
   void scaleTriangle(Triangle &triangle);

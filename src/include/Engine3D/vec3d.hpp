@@ -4,14 +4,14 @@
 
 namespace engine3D {
 
-class Point {
+class Vec3d {
 public:
   double x = 0;
   double y = 0;
   double z = 0;
 
-  Point() {};
-  Point(double x, double y, double z) : x(x), y(y), z(z) {};
+  Vec3d() {};
+  Vec3d(double x, double y, double z) : x(x), y(y), z(z) {};
 
   ImVec4 getImVec4() {
     return ImVec4(this->x, this->y, this->z,
