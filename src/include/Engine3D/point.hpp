@@ -6,6 +6,7 @@
 
 namespace engine3D {
 
+// TODO: Turn into a class and rename for better name
 struct Point {
   double x;
   double y;
@@ -23,9 +24,9 @@ struct Point {
   ImVec2 getImVec2() { return ImVec2(this->x, this->y); };
 };
 
+// TODO: Move this to its own file and turn it into a class
 struct Triangle {
   std::array<Point, 3> points;
-  ImU32 color = IM_COL32_WHITE;
 
   Point getNormarl() {
     // A line is a length between two points
@@ -53,6 +54,7 @@ struct Triangle {
   };
 };
 
+// TODO move to its own file and turn into a class
 struct Mesh {
   std::vector<Triangle> triangles;
 };
