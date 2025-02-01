@@ -4,9 +4,7 @@
 
 namespace engine3D {
 
-struct Matrix4x4 {
-  float m[4][4] = {0};
-};
+typedef float Matrix4x4[4][4];
 
 class Engine {
 public:
@@ -44,6 +42,8 @@ public:
 
 private:
   Mesh p_mesh_cube;
+  // Actually make a camera not just a point
+  Point camera = {.x = 0, .y = 0, .z = 0};
 
   void multiplyVectorMatrix(const Point &point, Point &output,
                             const Matrix4x4 &m);

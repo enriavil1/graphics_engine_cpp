@@ -1,4 +1,3 @@
-#include "../../include/window/window.hpp"
 
 #include "imgui.h"
 
@@ -9,6 +8,7 @@
 #include <unistd.h>
 
 #include "../../include/Engine3D/Engine3D.hpp"
+#include "../../include/window/window.hpp"
 
 bool Window::m_is_running = false;
 
@@ -88,6 +88,7 @@ void Window::process_events() {}
 void Window::run() {
   auto show_another_window = false;
   auto &io = ImGui::GetIO();
+
   engine3D::Engine engine;
 
   double theta = 0.0;
@@ -115,7 +116,7 @@ void Window::run() {
 
     {
       ImGui::Begin("Draw Port");
-      auto dt = 1.0f / (io.Framerate * 8.0f);
+      auto dt = 1.0f / (io.Framerate * 1.0f);
       theta += 1 * dt;
 
       engine.project(theta);
