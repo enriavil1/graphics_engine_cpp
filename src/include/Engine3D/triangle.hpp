@@ -3,7 +3,7 @@
 #include <array>
 #include <vector>
 
-#include "point.hpp"
+#include "vec3d.hpp"
 
 namespace engine3D {
 
