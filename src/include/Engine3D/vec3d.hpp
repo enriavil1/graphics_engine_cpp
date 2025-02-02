@@ -4,14 +4,14 @@
 
 namespace engine3D {
 
-class Vec3d {
+class Vec3D {
 public:
   double x = 0;
   double y = 0;
   double z = 0;
 
-  Vec3d() {};
-  Vec3d(double x, double y, double z) : x(x), y(y), z(z) {};
+  Vec3D() {};
+  Vec3D(double x, double y, double z) : x(x), y(y), z(z) {};
 
   ImVec4 getImVec4() {
     return ImVec4(this->x, this->y, this->z,

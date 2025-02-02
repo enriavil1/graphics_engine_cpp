@@ -85,7 +85,6 @@ void MainWindow::process_events() {}
 void MainWindow::run() {
   auto &io = ImGui::GetIO();
 
-  auto select_file = false;
   auto stats_port = std::make_shared<StatsPort>("Stats");
 
   auto draw_port = std::make_shared<DrawPort>("Draw Port");
@@ -105,15 +104,16 @@ void MainWindow::run() {
     ImGui::NewFrame();
     ImGui::DockSpaceOverViewport();
 
-    if (select_file) {
+    // if user is selecting a file we dont need to continue simulating
+    while (FileDialog::m_selecting_files) {
       std::cout << FileDialog::openDialog() << std::endl;
-      select_file = false;
+      FileDialog::m_selecting_files = false;
     }
 
     if (ImGui::BeginMainMenuBar()) {
 
       if (ImGui::BeginMenu("File")) {
-        ImGui::MenuItem("Open...", "Ctrl+O", &select_file);
+        ImGui::MenuItem("Open...", "Ctrl+O", &FileDialog::m_selecting_files);
         ImGui::EndMenu();
       }
 

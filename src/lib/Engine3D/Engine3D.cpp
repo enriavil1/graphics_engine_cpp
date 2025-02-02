@@ -42,7 +42,7 @@ void Engine::project(double theta) {
   x_rotation_matrix[2][2] = cosf(theta * 0.5f);
   x_rotation_matrix[3][3] = 1;
 
-  for (auto tri : this->p_mesh_cube.triangles) {
+  for (auto tri : this->p_projecting_mesh.triangles) {
     Triangle z_rotated_triangle, zx_rotated_triangle, projected_triangle;
 
     this->multiplyVectorMatrix(tri.points[0], z_rotated_triangle.points[0],
