@@ -20,7 +20,9 @@ set(GLFW_BUILD_EXAMPLES
     OFF
     CACHE BOOL "" FORCE)
 
-file(GLOB_RECURSE SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/lib/**/*.cpp")
+file(GLOB_RECURSE SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/lib/**/*.cpp"
+     "${CMAKE_CURRENT_SOURCE_DIR}/src/lib/**/*.mm")
+
 add_library(LibsModule ${SOURCE_FILES})
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/include/glfw EXCLUDE_FROM_ALL)

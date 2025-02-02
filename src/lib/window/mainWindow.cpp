@@ -1,8 +1,6 @@
 
 #include "imgui.h"
 
-#include <algorithm>
-#include <functional>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
@@ -12,6 +10,7 @@
 #include <vector>
 
 #include "../../include/window/drawPort.hpp"
+#include "../../include/window/fileDialog.hpp"
 #include "../../include/window/mainWindow.hpp"
 #include "../../include/window/statsPort.hpp"
 
@@ -27,7 +26,7 @@ void MainWindow::glfw_error_callback(int error, const char *description) {
   fprintf(stderr, "GLFW failed with error %d: %s\n", error, description);
 }
 
-bool MainWindow::initialize(const char *window_title) {
+bool MainWindow::initialize() {
   glfwSetErrorCallback(glfw_error_callback);
   if (!glfwInit()) {
     return false;
@@ -47,7 +46,7 @@ bool MainWindow::initialize(const char *window_title) {
 
   // Create window with graphics context
   MainWindow::m_window =
-      glfwCreateWindow(MainWindow::m_width, MainWindow::m_height, window_title,
+      glfwCreateWindow(MainWindow::m_width, MainWindow::m_height, "Main Window",
                        nullptr, nullptr);
 
   if (MainWindow::m_window == nullptr) {
@@ -86,6 +85,7 @@ void MainWindow::process_events() {}
 void MainWindow::run() {
   auto &io = ImGui::GetIO();
 
+  auto select_file = false;
   auto stats_port = std::make_shared<StatsPort>("Stats");
 
   auto draw_port = std::make_shared<DrawPort>("Draw Port");
@@ -105,10 +105,15 @@ void MainWindow::run() {
     ImGui::NewFrame();
     ImGui::DockSpaceOverViewport();
 
+    if (select_file) {
+      std::cout << FileDialog::openDialog() << std::endl;
+      select_file = false;
+    }
+
     if (ImGui::BeginMainMenuBar()) {
 
       if (ImGui::BeginMenu("File")) {
-        ImGui::MenuItem("Open...", "Ctrl+O");
+        ImGui::MenuItem("Open...", "Ctrl+O", &select_file);
         ImGui::EndMenu();
       }
 

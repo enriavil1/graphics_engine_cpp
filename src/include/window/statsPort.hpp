@@ -14,7 +14,6 @@ public:
 
   void run() {
     auto &io = ImGui::GetIO();
-    auto b = false;
 
     if (ImGui::Begin(this->window_title, &this->is_running,
                      ImGuiWindowFlags_AlwaysAutoResize)) {

@@ -13,8 +13,8 @@ public:
   bool initialize() { return true; }
 
   void run() {
-    const auto flags = ImGuiWindowFlags_NoCollapse |
-                       ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
+    const auto flags =
+        ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar;
 
     auto &io = ImGui::GetIO();
     engine3D::Engine engine;

@@ -5,7 +5,7 @@
 
 class MainWindow {
 public:
-  static bool initialize(const char *window_title);
+  static bool initialize();
   static void run();
 
   // Global theta of the whole application
