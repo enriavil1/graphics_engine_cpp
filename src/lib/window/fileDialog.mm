@@ -2,10 +2,12 @@
 
 #include <AppKit/AppKit.h>
 
+// Opens MacOS file dialog to pick a file to load
 std::string FileDialog::openDialog() {
 
   NSApplication *application = [NSApplication sharedApplication];
   [application setActivationPolicy:NSApplicationActivationPolicyAccessory];
+
   NSOpenPanel *openDlg = [NSOpenPanel openPanel];
   [openDlg setCanChooseFiles:YES];
   [openDlg setFloatingPanel:YES];

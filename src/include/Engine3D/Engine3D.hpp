@@ -1,6 +1,9 @@
 #pragma once
 
+#include "object3D.hpp"
 #include "triangle.hpp"
+
+#include <string>
 
 namespace engine3D {
 
@@ -40,7 +43,11 @@ public:
 
   void project(double theta);
 
+  void loadObject(std::string file_path);
+
 private:
+  std::vector<std::shared_ptr<Object3D>> p_loaded_objects;
+
   Mesh p_projecting_mesh;
 
   // TODO: Actually make a camera not just a point

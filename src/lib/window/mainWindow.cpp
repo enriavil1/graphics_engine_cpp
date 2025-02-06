@@ -86,7 +86,6 @@ void MainWindow::run() {
   auto &io = ImGui::GetIO();
 
   auto stats_port = std::make_shared<StatsPort>("Stats");
-
   auto draw_port = std::make_shared<DrawPort>("Draw Port");
 
   std::vector<std::shared_ptr<Window>> windows = {draw_port, stats_port};
@@ -103,12 +102,6 @@ void MainWindow::run() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     ImGui::DockSpaceOverViewport();
-
-    // if user is selecting a file we dont need to continue simulating
-    while (FileDialog::m_selecting_files) {
-      std::cout << FileDialog::openDialog() << std::endl;
-      FileDialog::m_selecting_files = false;
-    }
 
     if (ImGui::BeginMainMenuBar()) {
 
