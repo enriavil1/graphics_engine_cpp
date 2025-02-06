@@ -7,13 +7,13 @@
 
 namespace engine3D {
 
+// TODO: Create cpp file for this
 class Triangle {
 public:
   std::array<Vec3D, 3> points;
 
   Triangle() {};
   Triangle(std::array<Vec3D, 3> points) : points(points) {};
-
   Vec3D getNormarl() {
     // A line is a length between two points
     Vec3D lineA = Vec3D(points[1].x - points[0].x, points[1].y - points[0].y,
