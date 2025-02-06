@@ -1,6 +1,5 @@
 #include "../../../include/Engine3D/Engine3D.hpp"
 
-#include <array>
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -10,11 +9,20 @@
 
 using namespace engine3D;
 
-int Engine::getAmountOfTrianglesProjecting() {
-  return Engine::p_projecting_mesh.triangles.size();
+bool Engine::getProjectingObj(Object3D &obj) {
+  auto projecting_obj = Engine::p_projecting_obj.get();
+  if (projecting_obj != nullptr) {
+    obj = *projecting_obj;
+    return true;
+  }
+
+  return false;
 }
 
 void Engine::project(double theta) {
+  if (Engine::p_projecting_obj == nullptr) {
+    return;
+  }
 
   ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
@@ -51,7 +59,7 @@ void Engine::project(double theta) {
   x_rotation_matrix[2][2] = cosf(theta * 0.5f);
   x_rotation_matrix[3][3] = 1;
 
-  for (auto tri : Engine::p_projecting_mesh.triangles) {
+  for (auto &tri : Engine::p_projecting_obj->getMesh().triangles) {
     Triangle z_rotated_triangle, zx_rotated_triangle, projected_triangle;
 
     Engine::multiplyVectorMatrix(tri.points[0], z_rotated_triangle.points[0],
@@ -185,10 +193,12 @@ bool Engine::loadObject(std::string file_path) {
   }
 
   auto file_name = file_path.substr(file_path.find_last_of('/') + 1);
-  Engine::p_loaded_objects.push_back(
-      std::make_shared<Object3D>(mesh_loaded, file_name.c_str()));
 
-  Engine::p_projecting_mesh = mesh_loaded;
+  auto obj = std::make_shared<Object3D>(mesh_loaded, vertices.size(),
+                                        file_name.c_str());
+
+  Engine::p_loaded_objects.push_back(obj);
+  Engine::p_projecting_obj = obj;
 
   return true;
 }

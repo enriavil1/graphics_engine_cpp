@@ -12,17 +12,16 @@ typedef float Matrix4x4[4][4];
 class Engine {
 public:
   static void project(double theta);
-
   static bool loadObject(std::string file_path);
+  static bool getProjectingObj(Object3D &obj);
 
 private:
-  static std::vector<std::shared_ptr<Object3D>> p_loaded_objects;
+  inline static std::vector<std::shared_ptr<Object3D>> p_loaded_objects = {};
 
-  static Mesh p_projecting_mesh;
-  static int getAmountOfTrianglesProjecting();
+  inline static std::shared_ptr<Object3D> p_projecting_obj = nullptr;
 
   // TODO: Actually make a camera not just a point
-  static Vec3D camera;
+  inline static Vec3D camera = Vec3D();
 
   static void multiplyVectorMatrix(const Vec3D &point, Vec3D &output,
                                    const Matrix4x4 &m);
