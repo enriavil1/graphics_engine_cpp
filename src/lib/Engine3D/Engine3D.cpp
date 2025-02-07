@@ -167,21 +167,41 @@ bool Engine::loadObject(std::string file_path) {
 
     switch (line[0]) {
     case 'v': {
-      Vec3D vertex;
-      stream_line >> character >> vertex.x >> vertex.y >> vertex.z;
-      vertices.push_back(vertex);
+      switch (line[1]) {
+      case ' ': {
+        Vec3D vertex;
+        stream_line >> character >> vertex.x >> vertex.y >> vertex.z;
+        vertices.push_back(vertex);
+      } break;
+      default:
+        std::cout << "Missing symbol: " << line.substr(0, 2) << "\n";
+      }
     } break;
 
     case 'f': {
       int vertices_index[3];
-      stream_line >> character >> vertices_index[0] >> vertices_index[1] >>
-          vertices_index[2];
+      int vertices_normal_index[3];
+      int vertices_texture_index[3];
+      char junk;
+
+      stream_line >> character;
+      stream_line >> vertices_index[0] >> junk >> vertices_texture_index[0] >>
+          junk >> vertices_normal_index[0];
+      stream_line >> vertices_index[1] >> junk >> vertices_texture_index[1] >>
+          junk >> vertices_normal_index[1];
+      stream_line >> vertices_index[2] >> junk >> vertices_texture_index[2] >>
+          junk >> vertices_normal_index[2];
 
       auto triangle = Triangle({vertices[vertices_index[0] - 1],
                                 vertices[vertices_index[1] - 1],
                                 vertices[vertices_index[2] - 1]});
       mesh_loaded.triangles.push_back(triangle);
     } break;
+
+    // skip comments and empty lines
+    case ' ':
+    case '#':
+      break;
 
     default:
       std::cout << "Missing symbol: " << line[0] << "\n";
