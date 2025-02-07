@@ -3,6 +3,7 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <ostream>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -179,23 +180,36 @@ bool Engine::loadObject(std::string file_path) {
     } break;
 
     case 'f': {
-      int vertices_index[3];
-      int vertices_normal_index[3];
-      int vertices_texture_index[3];
+      int vertices_index[4];
+      int vertices_normal_index[4];
+      int vertices_texture_index[4];
       char junk;
 
       stream_line >> character;
-      stream_line >> vertices_index[0] >> junk >> vertices_texture_index[0] >>
-          junk >> vertices_normal_index[0];
-      stream_line >> vertices_index[1] >> junk >> vertices_texture_index[1] >>
-          junk >> vertices_normal_index[1];
-      stream_line >> vertices_index[2] >> junk >> vertices_texture_index[2] >>
-          junk >> vertices_normal_index[2];
 
-      auto triangle = Triangle({vertices[vertices_index[0] - 1],
-                                vertices[vertices_index[1] - 1],
-                                vertices[vertices_index[2] - 1]});
-      mesh_loaded.triangles.push_back(triangle);
+      const auto has_separator = line.find_first_of('/') <= line.size();
+
+      for (int i = 0; i < 4 && stream_line.rdbuf()->in_avail() > 0; ++i) {
+        if (has_separator) {
+          stream_line >> vertices_index[i] >> junk >>
+              vertices_texture_index[i] >> junk >> vertices_normal_index[i];
+        } else {
+          stream_line >> vertices_index[i];
+        }
+      }
+
+      mesh_loaded.triangles.push_back(Triangle(
+          {vertices[vertices_index[0] - 1], vertices[vertices_index[1] - 1],
+           vertices[vertices_index[2] - 1]}));
+
+      // if we have more means that the shape is made up of polygons so we have
+      // to add an extra triangle for the polygon to be filled
+      if (stream_line.rdbuf()->in_avail() > 0) {
+        mesh_loaded.triangles.push_back(Triangle(
+            {vertices[vertices_index[0] - 1], vertices[vertices_index[2] - 1],
+             vertices[vertices_index[3] - 1]}));
+      }
+
     } break;
 
     // skip comments and empty lines
