@@ -7,7 +7,7 @@ class Object3D {
 private:
   Mesh p_mesh;
   int p_amount_of_vertices;
-  const char *p_name;
+  std::string p_name;
 
 public:
   Object3D(Mesh mesh, int amount_of_vertices, const char *name)
@@ -15,6 +15,6 @@ public:
 
   int getAmountOfVertices();
   Mesh getMesh();
-  const char *getObjectName();
+  const std::string &getObjectName();
 };
 } // namespace engine3D

@@ -3,6 +3,7 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <ostream>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -167,21 +168,54 @@ bool Engine::loadObject(std::string file_path) {
 
     switch (line[0]) {
     case 'v': {
-      Vec3D vertex;
-      stream_line >> character >> vertex.x >> vertex.y >> vertex.z;
-      vertices.push_back(vertex);
+      switch (line[1]) {
+      case ' ': {
+        Vec3D vertex;
+        stream_line >> character >> vertex.x >> vertex.y >> vertex.z;
+        vertices.push_back(vertex);
+      } break;
+      default:
+        std::cout << "Missing symbol: " << line.substr(0, 2) << "\n";
+      }
     } break;
 
     case 'f': {
-      int vertices_index[3];
-      stream_line >> character >> vertices_index[0] >> vertices_index[1] >>
-          vertices_index[2];
+      int vertices_index[4];
+      int vertices_normal_index[4];
+      int vertices_texture_index[4];
+      char junk;
 
-      auto triangle = Triangle({vertices[vertices_index[0] - 1],
-                                vertices[vertices_index[1] - 1],
-                                vertices[vertices_index[2] - 1]});
-      mesh_loaded.triangles.push_back(triangle);
+      stream_line >> character;
+
+      const auto has_separator = line.find_first_of('/') <= line.size();
+
+      for (int i = 0; i < 4 && stream_line.rdbuf()->in_avail() > 0; ++i) {
+        if (has_separator) {
+          stream_line >> vertices_index[i] >> junk >>
+              vertices_texture_index[i] >> junk >> vertices_normal_index[i];
+        } else {
+          stream_line >> vertices_index[i];
+        }
+      }
+
+      mesh_loaded.triangles.push_back(Triangle(
+          {vertices[vertices_index[0] - 1], vertices[vertices_index[1] - 1],
+           vertices[vertices_index[2] - 1]}));
+
+      // if we have more means that the shape is made up of polygons so we have
+      // to add an extra triangle for the polygon to be filled
+      if (stream_line.rdbuf()->in_avail() > 0) {
+        mesh_loaded.triangles.push_back(Triangle(
+            {vertices[vertices_index[0] - 1], vertices[vertices_index[2] - 1],
+             vertices[vertices_index[3] - 1]}));
+      }
+
     } break;
+
+    // skip comments and empty lines
+    case ' ':
+    case '#':
+      break;
 
     default:
       std::cout << "Missing symbol: " << line[0] << "\n";

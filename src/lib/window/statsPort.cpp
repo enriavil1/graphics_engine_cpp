@@ -21,9 +21,9 @@ void StatsPort::run() {
                 1000.0f / io.Framerate, io.Framerate);
 
     if (engine3D::Engine::getProjectingObj(obj)) {
-      const char *obj_name = obj.getObjectName();
+      const auto &obj_name = obj.getObjectName();
       ImGui::NewLine();
-      ImGui::Text("Object Name: %s", obj_name);
+      ImGui::Text("Object Name: %s", obj_name.c_str());
       ImGui::Text("Amount of triangles being projected: %zu",
                   obj.getMesh().triangles.size());
       ImGui::Text("Amount of vertices being projected: %d",
