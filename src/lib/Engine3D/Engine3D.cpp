@@ -1,5 +1,7 @@
 #include "../../../include/Engine3D/Engine3D.hpp"
+#include "imgui.h"
 
+#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -60,6 +62,8 @@ void Engine::project(double theta) {
   x_rotation_matrix[2][2] = cosf(theta * 0.5f);
   x_rotation_matrix[3][3] = 1;
 
+  std::vector<Triangle> triangles_to_draw;
+
   for (auto &tri : Engine::p_projecting_obj->getMesh().triangles) {
     Triangle z_rotated_triangle, zx_rotated_triangle, projected_triangle;
 
@@ -104,16 +108,35 @@ void Engine::project(double theta) {
 
       // scale projection point
       Engine::scaleTriangle(projected_triangle);
-
-      const auto &window_pos = ImGui::GetWindowPos();
-      std::array<ImVec2, 3> drawing_points;
-      for (int i = 0; i < projected_triangle.points.size(); ++i) {
-        drawing_points[i] = projected_triangle.points[i].getImVec2(window_pos);
-      }
-
-      draw_list->AddTriangleFilled(drawing_points[0], drawing_points[1],
-                                   drawing_points[2], IM_COL32_WHITE);
+      triangles_to_draw.push_back(projected_triangle);
     }
+  }
+
+  std::sort(triangles_to_draw.begin(), triangles_to_draw.end(),
+            [](Triangle &triangle_1, Triangle &triangle_2) {
+              double triangle_1_avg_z = 0.0;
+              for (auto &point : triangle_1.points) {
+                triangle_1_avg_z += point.z;
+              }
+
+              double triangle_2_avg_z = 0.0;
+              for (auto &point : triangle_2.points) {
+                triangle_2_avg_z += point.z;
+              }
+              triangle_1_avg_z /= 3;
+
+              return triangle_1_avg_z > triangle_2_avg_z;
+            });
+
+  const auto &window_pos = ImGui::GetWindowPos();
+  std::array<ImVec2, 3> drawing_points;
+  for (auto &projected_triangle : triangles_to_draw) {
+    for (int i = 0; i < projected_triangle.points.size(); ++i) {
+      drawing_points[i] = projected_triangle.points[i].getImVec2(window_pos);
+    }
+
+    draw_list->AddTriangleFilled(drawing_points[0], drawing_points[1],
+                                 drawing_points[2], IM_COL32_WHITE);
   }
 };
 
