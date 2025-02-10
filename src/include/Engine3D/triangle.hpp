@@ -22,9 +22,7 @@ public:
     Vec3D lineB = Vec3D(points[2].x - points[0].x, points[2].y - points[0].y,
                         points[2].z - points[0].z);
 
-    Vec3D normal = Vec3D(lineA.y * lineB.z - lineA.z * lineB.y,
-                         lineA.z * lineB.x - lineA.x * lineB.z,
-                         lineA.x * lineB.y - lineA.y * lineB.x);
+    auto normal = lineA.getCrossProduct(lineB);
 
     // normalize the normal
     float normalizer =
