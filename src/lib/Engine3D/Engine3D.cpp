@@ -1,8 +1,9 @@
 #include "../../../include/Engine3D/Engine3D.hpp"
+#include "../../../include/Engine3D/matrix4x4/matrix4x4.hpp"
+
 #include "imgui.h"
 
 #include <algorithm>
-#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <ostream>
@@ -29,60 +30,22 @@ void Engine::project(double theta) {
 
   ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
-  const float NEAR = 0.1f;
-  const float FAR = 1000.0f;
-  const float FOV = 90.0f;
   const float ASPECT_RATIO = ImGui::GetWindowHeight() / ImGui::GetWindowWidth();
 
-  const float FOV_RAD = 1.0f / tanf(FOV * 0.5f / 180.0f * 3.1415f);
-
-  Matrix4x4 projection_matrix = {0};
-
-  projection_matrix[0][0] = ASPECT_RATIO * FOV_RAD;
-  projection_matrix[1][1] = FOV_RAD;
-  projection_matrix[2][2] = FAR / (FAR - NEAR);
-  projection_matrix[3][2] = (-FAR * NEAR) / (FAR - NEAR);
-  projection_matrix[2][3] = 1.0f;
-  projection_matrix[3][3] = 0.0f;
-
-  // Matrix used for the rotation of the object
-  Matrix4x4 z_rotation_matrix = {0};
-  z_rotation_matrix[0][0] = cosf(theta);
-  z_rotation_matrix[0][1] = sinf(theta);
-  z_rotation_matrix[1][0] = -sinf(theta);
-  z_rotation_matrix[1][1] = cosf(theta);
-  z_rotation_matrix[2][2] = 1;
-  z_rotation_matrix[3][3] = 1;
-
-  Matrix4x4 x_rotation_matrix = {0};
-  x_rotation_matrix[0][0] = 1;
-  x_rotation_matrix[1][1] = cosf(theta * 0.5f);
-  x_rotation_matrix[1][2] = sinf(theta * 0.5f);
-  x_rotation_matrix[2][1] = -sinf(theta * 0.5f);
-  x_rotation_matrix[2][2] = cosf(theta * 0.5f);
-  x_rotation_matrix[3][3] = 1;
+  const auto &projection_matrix = Matrix4x4::getProjectionMatrix(ASPECT_RATIO);
+  const auto &zx_rotation_matrix = Matrix4x4::getZXRotationMatrix(theta);
 
   std::vector<Triangle> triangles_to_draw;
 
   for (auto &tri : Engine::p_projecting_obj->getMesh().triangles) {
-    Triangle z_rotated_triangle, zx_rotated_triangle, projected_triangle;
+    Triangle zx_rotated_triangle, projected_triangle;
 
-    Engine::multiplyVectorMatrix(tri.points[0], z_rotated_triangle.points[0],
-                                 z_rotation_matrix);
-    Engine::multiplyVectorMatrix(tri.points[1], z_rotated_triangle.points[1],
-                                 z_rotation_matrix);
-    Engine::multiplyVectorMatrix(tri.points[2], z_rotated_triangle.points[2],
-                                 z_rotation_matrix);
-
-    Engine::multiplyVectorMatrix(z_rotated_triangle.points[0],
-                                 zx_rotated_triangle.points[0],
-                                 x_rotation_matrix);
-    Engine::multiplyVectorMatrix(z_rotated_triangle.points[1],
-                                 zx_rotated_triangle.points[1],
-                                 x_rotation_matrix);
-    Engine::multiplyVectorMatrix(z_rotated_triangle.points[2],
-                                 zx_rotated_triangle.points[2],
-                                 x_rotation_matrix);
+    Engine::multiplyVectorMatrix(tri.points[0], zx_rotated_triangle.points[0],
+                                 zx_rotation_matrix);
+    Engine::multiplyVectorMatrix(tri.points[1], zx_rotated_triangle.points[1],
+                                 zx_rotation_matrix);
+    Engine::multiplyVectorMatrix(tri.points[2], zx_rotated_triangle.points[2],
+                                 zx_rotation_matrix);
     // offset the z axis
     for (Vec3D &point : zx_rotated_triangle.points) {
       point.z += 40.0f;
