@@ -19,16 +19,22 @@ Vec3D Vec3D::operator*(const Matrix4x4 &matrix) {
   Vec3D output;
 
   output.x = this->x * matrix[0][0] + this->y * matrix[1][0] +
-             this->z * matrix[2][0] + matrix[3][0];
+             this->z * matrix[2][0] + this->w * matrix[3][0];
 
   output.y = this->x * matrix[0][1] + this->y * matrix[1][1] +
-             this->z * matrix[2][1] + matrix[3][1];
+             this->z * matrix[2][1] + this->w * matrix[3][1];
 
   output.z = this->x * matrix[0][2] + this->y * matrix[1][2] +
-             this->z * matrix[2][2] + matrix[3][2];
+             this->z * matrix[2][2] + this->w * matrix[3][2];
 
-  output.w = this->x * matrix[0][3] + this->y * matrix[1][3] +
-             this->z * matrix[2][3] + matrix[3][3];
+  const auto w = this->x * matrix[0][3] + this->y * matrix[1][3] +
+                 this->z * matrix[2][3] + this->w * matrix[3][3];
+
+  if (w != 0) {
+    output.x /= w;
+    output.y /= w;
+    output.z /= w;
+  }
 
   return output;
 }
