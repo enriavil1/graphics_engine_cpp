@@ -1,13 +1,12 @@
 #pragma once
 
+#include "matrix4x4/matrix4x4.hpp"
 #include "object3D.hpp"
 #include "triangle.hpp"
 
 #include <string>
 
 namespace engine3D {
-
-typedef float Matrix4x4[4][4];
 
 class Engine {
 public:
