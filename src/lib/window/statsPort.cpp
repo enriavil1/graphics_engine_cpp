@@ -21,6 +21,9 @@ void StatsPort::run() {
                 1000.0f / io.Framerate, io.Framerate);
 
     if (engine3D::Engine::getProjectingObj(obj)) {
+      ImGui::Checkbox("Toggle Object wire frame",
+                      &engine3D::Engine::show_wire_frame);
+
       const auto &obj_name = obj.getObjectName();
       ImGui::NewLine();
       ImGui::Text("Object Name: %s", obj_name.c_str());

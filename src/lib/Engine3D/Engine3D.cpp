@@ -54,18 +54,14 @@ void Engine::project(double theta) {
         normal.x * (zx_rotated_triangle.points[0].x - Engine::camera.x) +
         normal.y * (zx_rotated_triangle.points[0].y - Engine::camera.y) +
         normal.z * (zx_rotated_triangle.points[0].z - Engine::camera.z);
-
     if (dot_product < 0.0) {
 
-      Engine::multiplyVectorMatrix(zx_rotated_triangle.points[0],
-                                   projected_triangle.points[0],
-                                   projection_matrix);
-      Engine::multiplyVectorMatrix(zx_rotated_triangle.points[1],
-                                   projected_triangle.points[1],
-                                   projection_matrix);
-      Engine::multiplyVectorMatrix(zx_rotated_triangle.points[2],
-                                   projected_triangle.points[2],
-                                   projection_matrix);
+      projected_triangle.points[0] =
+          zx_rotated_triangle.points[0] * projection_matrix;
+      projected_triangle.points[1] =
+          zx_rotated_triangle.points[1] * projection_matrix;
+      projected_triangle.points[2] =
+          zx_rotated_triangle.points[2] * projection_matrix;
 
       // scale projection point
       Engine::scaleTriangle(projected_triangle);
@@ -98,6 +94,12 @@ void Engine::project(double theta) {
 
     draw_list->AddTriangleFilled(drawing_points[0], drawing_points[1],
                                  drawing_points[2], IM_COL32_WHITE);
+
+    if (Engine::show_wire_frame) {
+      draw_list->AddLine(drawing_points[0], drawing_points[1], IM_COL32_BLACK);
+      draw_list->AddLine(drawing_points[0], drawing_points[2], IM_COL32_BLACK);
+      draw_list->AddLine(drawing_points[1], drawing_points[2], IM_COL32_BLACK);
+    }
   }
 };
 
@@ -166,8 +168,8 @@ bool Engine::loadObject(std::string file_path) {
           {vertices[vertices_index[0] - 1], vertices[vertices_index[1] - 1],
            vertices[vertices_index[2] - 1]}));
 
-      // if we have more means that the shape is made up of polygons so we have
-      // to add an extra triangle for the polygon to be filled
+      // if we have more means that the shape is made up of polygons so we
+      // have to add an extra triangle for the polygon to be filled
       if (stream_line.rdbuf()->in_avail() > 0) {
         mesh_loaded.triangles.push_back(Triangle(
             {vertices[vertices_index[0] - 1], vertices[vertices_index[2] - 1],
