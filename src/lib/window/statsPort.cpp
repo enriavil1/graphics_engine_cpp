@@ -21,16 +21,18 @@ void StatsPort::run() {
                 1000.0f / io.Framerate, io.Framerate);
 
     if (engine3D::Engine::getProjectingObj(obj)) {
-      ImGui::Checkbox("Toggle Object wire frame",
-                      &engine3D::Engine::show_wire_frame);
+      ImGui::NewLine();
 
       const auto &obj_name = obj.getObjectName();
-      ImGui::NewLine();
       ImGui::Text("Object Name: %s", obj_name.c_str());
       ImGui::Text("Amount of triangles being projected: %zu",
                   obj.getMesh().triangles.size());
       ImGui::Text("Amount of vertices being projected: %d",
                   obj.getAmountOfVertices());
+
+      ImGui::NewLine();
+      ImGui::Checkbox("Toggle Object wire frame",
+                      &engine3D::Engine::show_wire_frame);
     }
 
     ImGui::End();
