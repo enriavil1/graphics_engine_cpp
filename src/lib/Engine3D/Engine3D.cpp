@@ -40,12 +40,10 @@ void Engine::project(double theta) {
   for (auto &tri : Engine::p_projecting_obj->getMesh().triangles) {
     Triangle zx_rotated_triangle, projected_triangle;
 
-    Engine::multiplyVectorMatrix(tri.points[0], zx_rotated_triangle.points[0],
-                                 zx_rotation_matrix);
-    Engine::multiplyVectorMatrix(tri.points[1], zx_rotated_triangle.points[1],
-                                 zx_rotation_matrix);
-    Engine::multiplyVectorMatrix(tri.points[2], zx_rotated_triangle.points[2],
-                                 zx_rotation_matrix);
+    for (int i = 0; i < 3; ++i) {
+      zx_rotated_triangle.points[i] = tri.points[i] * zx_rotation_matrix;
+    }
+
     // offset the z axis
     for (Vec3D &point : zx_rotated_triangle.points) {
       point.z += 40.0f;
@@ -100,26 +98,6 @@ void Engine::project(double theta) {
 
     draw_list->AddTriangleFilled(drawing_points[0], drawing_points[1],
                                  drawing_points[2], IM_COL32_WHITE);
-  }
-};
-
-void Engine::multiplyVectorMatrix(const Vec3D &point, Vec3D &output,
-                                  const Matrix4x4 &m) {
-
-  output.x =
-      point.x * m[0][0] + point.y * m[1][0] + point.z * m[2][0] + m[3][0];
-  output.y =
-      point.x * m[0][1] + point.y * m[1][1] + point.z * m[2][1] + m[3][1];
-  output.z =
-      point.x * m[0][2] + point.y * m[1][2] + point.z * m[2][2] + m[3][2];
-
-  const float w =
-      point.x * m[0][3] + point.y * m[1][3] + point.z * m[2][3] + m[3][3];
-
-  if (w != 0.0f) {
-    output.x /= w;
-    output.y /= w;
-    output.z /= w;
   }
 };
 

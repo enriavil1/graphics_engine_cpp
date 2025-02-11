@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../vec3d.hpp"
 #include "row.hpp"
 
 namespace engine3D {
@@ -22,9 +21,6 @@ public:
 
   Matrix4x4 operator*(const Matrix4x4 &matrix) const;
   Matrix4x4 operator*(const Matrix4x4 &matrix);
-
-  Matrix4x4 operator*(const Vec3D &vec3d) const;
-  Matrix4x4 operator*(const Vec3D &vec3d);
 
   static const Matrix4x4 getProjectionMatrix(const float &aspect_ratio);
   static const Matrix4x4 getZRotationMatrix(const float &theta);

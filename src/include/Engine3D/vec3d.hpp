@@ -1,5 +1,6 @@
 #pragma once
 
+#include "matrix4x4/matrix4x4.hpp"
 #include <imgui.h>
 
 namespace engine3D {
@@ -23,8 +24,12 @@ public:
   ImVec2 getImVec2() { return ImVec2(this->x, this->y); };
 
   Vec3D operator+(const Vec3D &vec3d);
+
   Vec3D operator-(const Vec3D &vec3d);
+
   Vec3D operator*(const Vec3D &vec3d);
+  Vec3D operator*(const Matrix4x4 &matrix);
+
   Vec3D operator/(const Vec3D &vec3d);
 
   float getDotProduct(const Vec3D &vec3d);

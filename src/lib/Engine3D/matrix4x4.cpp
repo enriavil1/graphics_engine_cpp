@@ -1,5 +1,4 @@
 #include "../../include/Engine3D/matrix4x4/matrix4x4.hpp"
-#include <iostream>
 
 using namespace engine3D;
 
