@@ -13,6 +13,8 @@
 
 using namespace engine3D;
 
+Camera &Engine::getCamera() { return Engine::p_camera; }
+
 bool Engine::getProjectingObj(Object3D &obj) {
   auto projecting_obj = Engine::p_projecting_obj.get();
   if (projecting_obj != nullptr) {
@@ -46,16 +48,19 @@ void Engine::project(double theta) {
 
     // offset the z axis
     for (Vec3D &point : zx_rotated_triangle.points) {
-      point.z += 40.0f;
+      point.z += (40.0f - Engine::p_camera.getPos().z);
     }
 
     const auto normal = zx_rotated_triangle.getNormarl();
     const double dot_product =
-        normal.x * (zx_rotated_triangle.points[0].x - Engine::camera.x) +
-        normal.y * (zx_rotated_triangle.points[0].y - Engine::camera.y) +
-        normal.z * (zx_rotated_triangle.points[0].z - Engine::camera.z);
-    if (dot_product < 0.0) {
+        normal.x *
+            (zx_rotated_triangle.points[0].x - Engine::p_camera.getPos().x) +
+        normal.y *
+            (zx_rotated_triangle.points[0].y - Engine::p_camera.getPos().y) +
+        normal.z *
+            (zx_rotated_triangle.points[0].z - Engine::p_camera.getPos().z);
 
+    if (dot_product < 0.0) {
       projected_triangle.points[0] =
           zx_rotated_triangle.points[0] * projection_matrix;
       projected_triangle.points[1] =
