@@ -13,10 +13,10 @@
 
 using namespace engine3D;
 
-Camera &Engine::getCamera() { return Engine::p_camera; }
+Camera &Engine::getCamera() { return Engine::mp_camera; }
 
 bool Engine::getProjectingObj(Object3D &obj) {
-  auto projecting_obj = Engine::p_projecting_obj.get();
+  auto projecting_obj = Engine::mp_projecting_obj.get();
   if (projecting_obj != nullptr) {
     obj = *projecting_obj;
     return true;
@@ -26,10 +26,11 @@ bool Engine::getProjectingObj(Object3D &obj) {
 }
 
 void Engine::project(double theta) {
-  if (Engine::p_projecting_obj == nullptr) {
+  if (Engine::mp_projecting_obj == nullptr) {
     return;
   }
 
+  auto camera_pos = Engine::mp_camera.getPos();
   ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
   const float ASPECT_RATIO = ImGui::GetWindowHeight() / ImGui::GetWindowWidth();
@@ -39,7 +40,7 @@ void Engine::project(double theta) {
 
   std::vector<Triangle> triangles_to_draw;
 
-  for (auto &tri : Engine::p_projecting_obj->getMesh().triangles) {
+  for (auto &tri : Engine::mp_projecting_obj->getMesh().triangles) {
     Triangle zx_rotated_triangle, projected_triangle;
 
     for (int i = 0; i < 3; ++i) {
@@ -48,17 +49,12 @@ void Engine::project(double theta) {
 
     // offset the z axis
     for (Vec3D &point : zx_rotated_triangle.points) {
-      point.z += (40.0f - Engine::p_camera.getPos().z);
+      point.z += (40.0f - camera_pos.z);
     }
 
     const auto normal = zx_rotated_triangle.getNormarl();
     const double dot_product =
-        normal.x *
-            (zx_rotated_triangle.points[0].x - Engine::p_camera.getPos().x) +
-        normal.y *
-            (zx_rotated_triangle.points[0].y - Engine::p_camera.getPos().y) +
-        normal.z *
-            (zx_rotated_triangle.points[0].z - Engine::p_camera.getPos().z);
+        normal.getDotProduct(zx_rotated_triangle.points[0] - camera_pos);
 
     if (dot_product < 0.0) {
       projected_triangle.points[0] =
@@ -91,10 +87,15 @@ void Engine::project(double theta) {
             });
 
   const auto &window_pos = ImGui::GetWindowPos();
+  const auto &camera_2d_pos = camera_pos.getImVec2();
+  const auto projected_position =
+      ImVec2(window_pos.x - camera_2d_pos.x, window_pos.y - camera_2d_pos.y);
+
   std::array<ImVec2, 3> drawing_points;
   for (auto &projected_triangle : triangles_to_draw) {
     for (int i = 0; i < projected_triangle.points.size(); ++i) {
-      drawing_points[i] = projected_triangle.points[i].getImVec2(window_pos);
+      drawing_points[i] =
+          projected_triangle.points[i].getImVec2(projected_position);
     }
 
     draw_list->AddTriangleFilled(drawing_points[0], drawing_points[1],
@@ -110,10 +111,19 @@ void Engine::project(double theta) {
 
 void Engine::scaleTriangle(Triangle &triangle) {
   for (Vec3D &point : triangle.points) {
-    point.x = (point.x + 1.0f) * ImGui::GetWindowWidth() * 0.5f;
-    point.y = (point.y + 1.0f) * ImGui::GetWindowHeight() * 0.5f;
+    Engine::scaleVec2d(point);
   }
 };
+
+void Engine::scaleVec2d(ImVec2 &point) {
+  point.x = (point.x + 1.0f) * ImGui::GetWindowWidth() * 0.5f;
+  point.y = (point.y + 1.0f) * ImGui::GetWindowHeight() * 0.5f;
+}
+
+void Engine::scaleVec2d(Vec3D &point) {
+  point.x = (point.x + 1.0f) * ImGui::GetWindowWidth() * 0.5f;
+  point.y = (point.y + 1.0f) * ImGui::GetWindowHeight() * 0.5f;
+}
 
 bool Engine::loadObject(std::string file_path) {
   if (file_path.substr(file_path.find_last_of(".")) != ".obj") {
@@ -202,8 +212,8 @@ bool Engine::loadObject(std::string file_path) {
   auto obj = std::make_shared<Object3D>(mesh_loaded, vertices.size(),
                                         file_name.c_str());
 
-  Engine::p_loaded_objects.push_back(obj);
-  Engine::p_projecting_obj = obj;
+  Engine::mp_loaded_objects.push_back(obj);
+  Engine::mp_projecting_obj = obj;
 
   return true;
 }

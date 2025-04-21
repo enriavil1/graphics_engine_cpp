@@ -4,6 +4,7 @@
 #include "matrix4x4/matrix4x4.hpp"
 #include "object3D.hpp"
 #include "triangle.hpp"
+#include "vec3d.hpp"
 
 #include <string>
 
@@ -20,16 +21,18 @@ public:
   static Camera &getCamera();
 
 private:
-  inline static std::vector<std::shared_ptr<Object3D>> p_loaded_objects = {};
+  inline static std::vector<std::shared_ptr<Object3D>> mp_loaded_objects = {};
 
-  inline static std::shared_ptr<Object3D> p_projecting_obj = nullptr;
+  inline static std::shared_ptr<Object3D> mp_projecting_obj = nullptr;
 
-  inline static Camera p_camera = Camera();
+  inline static Camera mp_camera = Camera();
 
   static void multiplyVectorMatrix(const Vec3D &point, Vec3D &output,
                                    const Matrix4x4 &m);
 
   static void scaleTriangle(Triangle &triangle);
+  static void scaleVec2d(ImVec2 &point);
+  static void scaleVec2d(Vec3D &point);
 };
 
 } // namespace engine3D

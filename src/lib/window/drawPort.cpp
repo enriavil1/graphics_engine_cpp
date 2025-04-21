@@ -18,7 +18,7 @@ void DrawPort::run() {
   ImGui::SetNextWindowClass(&window_class);
   if (ImGui::Begin(this->window_title, NULL, flags)) {
 
-    auto dt = 1.0f / (io.Framerate * 1.0f);
+    auto dt = 1.0f / (io.Framerate * 8.0f);
     MainWindow::m_theta += 1 * dt;
 
     engine3D::Engine::project(MainWindow::m_theta);

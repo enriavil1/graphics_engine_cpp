@@ -15,6 +15,10 @@ Vec3D Vec3D::operator*(const Vec3D &vec3d) {
   return Vec3D(this->x * vec3d.x, this->y * vec3d.y, this->z * vec3d.z);
 }
 
+Vec3D Vec3D::operator*(const float &num) {
+  return Vec3D(this->x * num, this->y * num, this->z * num);
+}
+
 Vec3D Vec3D::operator*(const Matrix4x4 &matrix) {
   Vec3D output;
 
@@ -43,7 +47,7 @@ Vec3D Vec3D::operator/(const Vec3D &vec3d) {
   return Vec3D(this->x / vec3d.x, this->y / vec3d.y, this->z / vec3d.z);
 }
 
-float Vec3D::getDotProduct(const Vec3D &vec3d) {
+float Vec3D::getDotProduct(const Vec3D &vec3d) const {
   return this->x * vec3d.x + this->y * vec3d.y + this->z * vec3d.z;
 }
 

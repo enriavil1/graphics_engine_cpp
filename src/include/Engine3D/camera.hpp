@@ -13,9 +13,11 @@ public:
   void moveRight();
 
   Vec3D getPos();
+  Vec3D getDirection();
 
 private:
-  Vec3D position = Vec3D();
+  Vec3D p_position = Vec3D(0, 0, 0);
+  Vec3D p_direction = Vec3D(0, 0, 1);
 };
 
 }; // namespace engine3D

@@ -50,8 +50,19 @@ const Matrix4x4 Matrix4x4::getProjectionMatrix(const float &aspect_ratio) {
   return projection_matrix;
 }
 
+const Matrix4x4 Matrix4x4::getYRotationMatrix(const float &theta) {
+  Matrix4x4 y_rotation_matrix;
+  y_rotation_matrix[0][0] = cosf(theta);
+  y_rotation_matrix[0][2] = -sinf(theta);
+  y_rotation_matrix[1][1] = 1;
+  y_rotation_matrix[2][0] = sinf(theta);
+  y_rotation_matrix[2][2] = cosf(theta);
+  y_rotation_matrix[3][3] = 1;
+
+  return y_rotation_matrix;
+}
+
 const Matrix4x4 Matrix4x4::getZRotationMatrix(const float &theta) {
-  // Matrix used for the rotation of the object
   Matrix4x4 z_rotation_matrix;
   z_rotation_matrix[0][0] = cosf(theta);
   z_rotation_matrix[0][1] = sinf(theta);
