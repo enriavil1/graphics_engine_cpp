@@ -63,6 +63,11 @@ Vec3D Vec3D::getCrossProduct(const Vec3D &vec3d) {
 
 Vec3D Vec3D::normalize(const Vec3D &vec3d) {
   const auto vector_length = this->getVectorLength(vec3d);
+
+  // avoid division by 0
+  if (vector_length == 0)
+    return Vec3D(0, 0, 0);
+
   return Vec3D(this->x / vector_length, this->y / vector_length,
                this->z / vector_length);
 }
