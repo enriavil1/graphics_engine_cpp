@@ -87,15 +87,11 @@ void Engine::project(double theta) {
             });
 
   const auto &window_pos = ImGui::GetWindowPos();
-  const auto &camera_2d_pos = camera_pos.getImVec2();
-  const auto projected_position =
-      ImVec2(window_pos.x - camera_2d_pos.x, window_pos.y - camera_2d_pos.y);
 
   std::array<ImVec2, 3> drawing_points;
   for (auto &projected_triangle : triangles_to_draw) {
     for (int i = 0; i < projected_triangle.points.size(); ++i) {
-      drawing_points[i] =
-          projected_triangle.points[i].getImVec2(projected_position);
+      drawing_points[i] = projected_triangle.points[i].getImVec2(window_pos);
     }
 
     draw_list->AddTriangleFilled(drawing_points[0], drawing_points[1],
