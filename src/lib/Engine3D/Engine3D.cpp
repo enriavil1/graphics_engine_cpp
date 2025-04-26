@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
-#include <ostream>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -36,33 +35,31 @@ void Engine::project(double theta) {
   const float ASPECT_RATIO = ImGui::GetWindowHeight() / ImGui::GetWindowWidth();
 
   const auto &projection_matrix = Matrix4x4::getProjectionMatrix(ASPECT_RATIO);
-  const auto &zx_rotation_matrix = Matrix4x4::getZXRotationMatrix(theta);
+  const auto &view_matrix = Engine::getCamera().getLookAtMatrix();
+
+  auto world_matrix = Matrix4x4::getWorldMatrix();
 
   std::vector<Triangle> triangles_to_draw;
 
   for (auto &tri : Engine::mp_projecting_obj->getMesh().triangles) {
-    Triangle zx_rotated_triangle, projected_triangle;
+    Triangle projected_triangle;
 
     for (int i = 0; i < 3; ++i) {
-      zx_rotated_triangle.points[i] = tri.points[i] * zx_rotation_matrix;
+      projected_triangle.points[i] = tri.points[i] * world_matrix;
     }
 
-    // offset the z axis
-    for (Vec3D &point : zx_rotated_triangle.points) {
-      point.z += (40.0f - camera_pos.z);
-    }
-
-    const auto normal = zx_rotated_triangle.getNormarl();
+    const auto normal = projected_triangle.getNormarl();
     const double dot_product =
-        normal.getDotProduct(zx_rotated_triangle.points[0] - camera_pos);
+        normal.getDotProduct(projected_triangle.points[0] - camera_pos);
 
     if (dot_product < 0.0) {
+
       projected_triangle.points[0] =
-          zx_rotated_triangle.points[0] * projection_matrix;
+          (projected_triangle.points[0] * view_matrix) * projection_matrix;
       projected_triangle.points[1] =
-          zx_rotated_triangle.points[1] * projection_matrix;
+          (projected_triangle.points[1] * view_matrix) * projection_matrix;
       projected_triangle.points[2] =
-          zx_rotated_triangle.points[2] * projection_matrix;
+          (projected_triangle.points[2] * view_matrix) * projection_matrix;
 
       // scale projection point
       Engine::scaleTriangle(projected_triangle);

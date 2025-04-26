@@ -10,15 +10,14 @@ public:
 
   void moveForward(const double &theta);
   void moveBackwards(const double &theta);
-  void moveLeft(const double &theta);
-  void moveRight(const double &theta);
+  void moveLeft();
+  void moveRight();
 
   Matrix4x4 getLookAtMatrix();
 
   Vec3D getPos();
   Vec3D getDirection();
   Vec3D getForwardStep(const double &theta);
-  Vec3D getRightStep(const double &theta);
 
   Vec3D up_vector = Vec3D(0, 1, 0);
 

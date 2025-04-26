@@ -27,5 +27,8 @@ public:
   static const Matrix4x4 getZRotationMatrix(const float &theta);
   static const Matrix4x4 getXRotationMatrix(const float &theta);
   static const Matrix4x4 getZXRotationMatrix(const float &theta);
+  static Matrix4x4 getWorldMatrix();
+
+  Matrix4x4 inverse();
 };
 }; // namespace engine3D
