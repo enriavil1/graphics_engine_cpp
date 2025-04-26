@@ -31,20 +31,18 @@ Vec3D Vec3D::operator*(const Matrix4x4 &matrix) {
   output.z = this->x * matrix[0][2] + this->y * matrix[1][2] +
              this->z * matrix[2][2] + this->w * matrix[3][2];
 
-  const auto w = this->x * matrix[0][3] + this->y * matrix[1][3] +
-                 this->z * matrix[2][3] + this->w * matrix[3][3];
-
-  if (w != 0) {
-    output.x /= w;
-    output.y /= w;
-    output.z /= w;
-  }
+  output.w = this->x * matrix[0][3] + this->y * matrix[1][3] +
+             this->z * matrix[2][3] + this->w * matrix[3][3];
 
   return output;
 }
 
 Vec3D Vec3D::operator/(const Vec3D &vec3d) {
   return Vec3D(this->x / vec3d.x, this->y / vec3d.y, this->z / vec3d.z);
+}
+
+Vec3D Vec3D::operator/(const float &num) {
+  return Vec3D(this->x / num, this->y / num, this->z / num);
 }
 
 float Vec3D::getDotProduct(const Vec3D &vec3d) const {

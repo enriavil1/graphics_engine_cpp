@@ -58,6 +58,9 @@ void Engine::project(double theta) {
       for (int i = 0; i < 3; ++i) {
         projected_triangle.points[i] =
             (projected_triangle.points[i] * view_matrix) * projection_matrix;
+
+        projected_triangle.points[i] =
+            projected_triangle.points[i] / projected_triangle.points[i].w;
       }
 
       // scale projection point

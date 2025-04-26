@@ -32,6 +32,7 @@ public:
   Vec3D operator*(const float &num);
 
   Vec3D operator/(const Vec3D &vec3d);
+  Vec3D operator/(const float &num);
 
   float getDotProduct(const Vec3D &vec3d) const;
   float getVectorLength(const Vec3D &vec3d);
