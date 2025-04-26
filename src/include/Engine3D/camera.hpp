@@ -8,22 +8,20 @@ class Camera {
 public:
   Camera() {};
 
-  void moveForward();
-  void moveBackwards();
-  void moveLeft();
-  void moveRight();
-  void moveUp();
-  void moveDown();
+  void moveForward(const double &theta);
+  void moveBackwards(const double &theta);
+  void moveLeft(const double &theta);
+  void moveRight(const double &theta);
+  void moveUp(const double &theta);
+  void moveDown(const double &theta);
 
-  void turnLeft();
-  void turnRight();
+  void turnLeft(const double &theta);
+  void turnRight(const double &theta);
 
   Matrix4x4 getLookAtMatrix();
 
   Vec3D getPos();
   Vec3D getDirection();
-
-  Vec3D up_vector = Vec3D(0, 1, 0);
 
 private:
   Vec3D p_position = Vec3D(0, 0, 0);

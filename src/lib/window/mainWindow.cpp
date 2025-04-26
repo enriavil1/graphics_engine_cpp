@@ -90,31 +90,35 @@ void MainWindow::process_events() {
       MainWindow::m_window,
       [](GLFWwindow *window, int key, int scancode, int action, int mods) {
         auto &camera = engine3D::Engine::getCamera();
+        const auto &elapsed_time = MainWindow::m_theta;
         switch (key) {
         case GLFW_KEY_W:
-          camera.moveForward();
+          camera.moveForward(elapsed_time);
           break;
         case GLFW_KEY_S:
-          camera.moveBackwards();
+          camera.moveBackwards(elapsed_time);
           break;
         case GLFW_KEY_A:
-          camera.moveLeft();
+          // camera.moveLeft();
+          camera.turnLeft(elapsed_time);
+
           break;
         case GLFW_KEY_D:
-          camera.moveRight();
+          // camera.moveRight();
+          camera.turnRight(elapsed_time);
           break;
 
         case GLFW_KEY_UP:
-          camera.moveUp();
+          camera.moveUp(elapsed_time);
           break;
         case GLFW_KEY_DOWN:
-          camera.moveDown();
+          camera.moveDown(elapsed_time);
           break;
         case GLFW_KEY_LEFT:
-          camera.turnLeft();
+          camera.turnLeft(elapsed_time);
           break;
         case GLFW_KEY_RIGHT:
-          camera.turnRight();
+          camera.turnRight(elapsed_time);
           break;
         }
       });

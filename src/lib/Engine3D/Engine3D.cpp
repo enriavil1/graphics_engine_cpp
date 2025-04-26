@@ -34,10 +34,11 @@ void Engine::project(double theta) {
 
   const float ASPECT_RATIO = ImGui::GetWindowHeight() / ImGui::GetWindowWidth();
 
+  auto world_matrix = Matrix4x4::getWorldMatrix() *
+                      Matrix4x4::getTranslationMatrix(0.0f, 0.0f, 5.0f);
+
   const auto &projection_matrix = Matrix4x4::getProjectionMatrix(ASPECT_RATIO);
   const auto &view_matrix = Engine::getCamera().getLookAtMatrix();
-
-  auto world_matrix = Matrix4x4::getWorldMatrix();
 
   std::vector<Triangle> triangles_to_draw;
 
@@ -54,12 +55,10 @@ void Engine::project(double theta) {
 
     if (dot_product < 0.0) {
 
-      projected_triangle.points[0] =
-          (projected_triangle.points[0] * view_matrix) * projection_matrix;
-      projected_triangle.points[1] =
-          (projected_triangle.points[1] * view_matrix) * projection_matrix;
-      projected_triangle.points[2] =
-          (projected_triangle.points[2] * view_matrix) * projection_matrix;
+      for (int i = 0; i < 3; ++i) {
+        projected_triangle.points[i] =
+            (projected_triangle.points[i] * view_matrix) * projection_matrix;
+      }
 
       // scale projection point
       Engine::scaleTriangle(projected_triangle);
@@ -79,6 +78,7 @@ void Engine::project(double theta) {
                 triangle_2_avg_z += point.z;
               }
               triangle_1_avg_z /= 3;
+              triangle_2_avg_z /= 3;
 
               return triangle_1_avg_z > triangle_2_avg_z;
             });
@@ -146,6 +146,7 @@ bool Engine::loadObject(std::string file_path) {
       case ' ': {
         Vec3D vertex;
         stream_line >> character >> vertex.x >> vertex.y >> vertex.z;
+
         vertices.push_back(vertex);
       } break;
       default:

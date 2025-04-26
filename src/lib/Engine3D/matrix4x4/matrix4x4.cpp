@@ -44,6 +44,22 @@ Matrix4x4 Matrix4x4::getWorldMatrix() {
   return world_matrix;
 }
 
+const Matrix4x4 Matrix4x4::getTranslationMatrix(const double &x,
+                                                const double &y,
+                                                const double &z) {
+  Matrix4x4 translation_matrix;
+
+  translation_matrix[0][0] = 1.0f;
+  translation_matrix[1][1] = 1.0f;
+  translation_matrix[2][2] = 1.0f;
+  translation_matrix[3][0] = x;
+  translation_matrix[3][1] = y;
+  translation_matrix[3][2] = z;
+  translation_matrix[3][3] = 1.0f;
+
+  return translation_matrix;
+}
+
 const Matrix4x4 Matrix4x4::getProjectionMatrix(const float &aspect_ratio) {
   const float NEAR = 0.1f;
   const float FAR = 1000.0f;
@@ -65,10 +81,10 @@ const Matrix4x4 Matrix4x4::getYRotationMatrix(const float &theta) {
   Matrix4x4 y_rotation_matrix;
   y_rotation_matrix[0][0] = cosf(theta);
   y_rotation_matrix[0][2] = sinf(theta);
-  y_rotation_matrix[1][1] = 1;
+  y_rotation_matrix[1][1] = 1.0f;
   y_rotation_matrix[2][0] = -sinf(theta);
   y_rotation_matrix[2][2] = cosf(theta);
-  y_rotation_matrix[3][3] = 1;
+  y_rotation_matrix[3][3] = 1.0f;
 
   return y_rotation_matrix;
 }
