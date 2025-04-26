@@ -12,6 +12,8 @@ public:
   void moveBackwards(const double &theta);
   void moveLeft(const double &theta);
   void moveRight(const double &theta);
+  void turnLeft(const double &theta);
+  void turnRight(const double &theta);
 
   Matrix4x4 getLookAtMatrix();
 
@@ -25,6 +27,8 @@ public:
 private:
   Vec3D p_position = Vec3D(0, 0, 0);
   Vec3D p_direction = Vec3D(0, 0, 1);
+
+  double p_y_rotation = 0.0;
 };
 
 }; // namespace engine3D

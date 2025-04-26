@@ -104,6 +104,10 @@ void MainWindow::process_events() {
         case GLFW_KEY_D:
           camera.moveRight(theta);
           break;
+        case GLFW_KEY_LEFT:
+          camera.turnLeft(theta);
+        case GLFW_KEY_RIGHT:
+          camera.turnRight(theta);
         }
       });
 }

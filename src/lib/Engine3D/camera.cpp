@@ -19,12 +19,27 @@ void Camera::moveForward(const double &theta) {
 void Camera::moveBackwards(const double &theta) {
   this->p_position = this->p_position - this->getForwardStep(theta);
 }
+
 void Camera::moveLeft(const double &theta) {
   this->p_position = this->p_position - this->getRightStep(theta);
 }
 
+void Camera::turnLeft(const double &theta) {
+  this->p_y_rotation -= 1.0f * theta;
+  auto y_rotation_matrix = Matrix4x4::getYRotationMatrix(this->p_y_rotation);
+  this->p_direction =
+      this->p_position + (this->p_direction * y_rotation_matrix);
+}
+
 void Camera::moveRight(const double &theta) {
   this->p_position = this->p_position + this->getRightStep(theta);
+}
+
+void Camera::turnRight(const double &theta) {
+  this->p_y_rotation += 1.0f * theta;
+  auto y_rotation_matrix = Matrix4x4::getYRotationMatrix(this->p_y_rotation);
+  this->p_direction =
+      this->p_position + (this->p_direction * y_rotation_matrix);
 }
 
 Vec3D Camera::getPos() { return this->p_position; }

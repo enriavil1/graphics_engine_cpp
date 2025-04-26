@@ -35,6 +35,7 @@ Matrix4x4 Matrix4x4::operator*(const Matrix4x4 &matrix) {
 
 Matrix4x4 Matrix4x4::getWorldMatrix() {
   auto world_matrix = Matrix4x4();
+
   world_matrix[0][0] = 1.0f;
   world_matrix[1][1] = 1.0f;
   world_matrix[2][2] = 1.0f;
