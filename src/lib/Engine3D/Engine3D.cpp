@@ -29,7 +29,7 @@ void Engine::project(double theta) {
     return;
   }
 
-  auto camera_pos = Engine::mp_camera.getPos();
+  auto camera_pos = Engine::getCamera().getPos();
   ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
   const float ASPECT_RATIO = ImGui::GetWindowHeight() / ImGui::GetWindowWidth();

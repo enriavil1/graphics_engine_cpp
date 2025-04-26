@@ -1,42 +1,32 @@
 #include "../../include/Engine3D/camera.hpp"
 
-#define STEP 8.0f
+#define STEP 4.0f
 
 using namespace engine3D;
 
-Vec3D Camera::getForwardStep(const double &theta) {
-  return this->p_direction * (STEP * theta);
+void Camera::moveUp() { this->p_position.y += 2.0f; }
+void Camera::moveDown() { this->p_position.y -= 2.0f; }
+
+void Camera::moveForward() {
+  this->p_position = this->p_position + this->p_direction * 4.0f;
+}
+void Camera::moveBackwards() {
+  this->p_position = this->p_position - this->p_direction * 4.0f;
 }
 
-Vec3D Camera::getRightStep(const double &theta) {
-  const auto &forward = this->getForwardStep(theta);
-  return this->up_vector.getCrossProduct(forward);
-}
+void Camera::moveLeft() { this->p_position.x -= 1.0f; }
 
-void Camera::moveForward(const double &theta) {
-  this->p_position = this->p_position + this->getForwardStep(theta);
-}
-void Camera::moveBackwards(const double &theta) {
-  this->p_position = this->p_position - this->getForwardStep(theta);
-}
-
-void Camera::moveLeft(const double &theta) {
-  this->p_position = this->p_position - this->getRightStep(theta);
-}
-
-void Camera::turnLeft(const double &theta) {
-  this->p_y_rotation -= 1.0f * theta;
+void Camera::turnLeft() {
+  this->p_y_rotation -= 2.0f;
   auto y_rotation_matrix = Matrix4x4::getYRotationMatrix(this->p_y_rotation);
   this->p_direction =
       this->p_position + (this->p_direction * y_rotation_matrix);
 }
 
-void Camera::moveRight(const double &theta) {
-  this->p_position = this->p_position + this->getRightStep(theta);
-}
+void Camera::moveRight() { this->p_position.x += 1.0f; }
 
-void Camera::turnRight(const double &theta) {
-  this->p_y_rotation += 1.0f * theta;
+void Camera::turnRight() {
+  this->p_y_rotation += 2.0f;
   auto y_rotation_matrix = Matrix4x4::getYRotationMatrix(this->p_y_rotation);
   this->p_direction =
       this->p_position + (this->p_direction * y_rotation_matrix);
