@@ -49,9 +49,11 @@ float Vec3D::getDotProduct(const Vec3D &vec3d) const {
   return this->x * vec3d.x + this->y * vec3d.y + this->z * vec3d.z;
 }
 
-float Vec3D::getVectorLength(const Vec3D &vec3d) {
-  return sqrtf(this->getDotProduct(vec3d));
+float Vec3D::getDotProduct() const {
+  return this->x * this->x + this->y * this->y + this->z * this->z;
 }
+
+float Vec3D::getVectorLength() { return sqrtf(this->getDotProduct()); }
 
 Vec3D Vec3D::getCrossProduct(const Vec3D &vec3d) {
   return Vec3D(this->y * vec3d.z - this->z * vec3d.y,
@@ -59,8 +61,8 @@ Vec3D Vec3D::getCrossProduct(const Vec3D &vec3d) {
                this->x * vec3d.y - this->y * vec3d.x);
 }
 
-Vec3D Vec3D::normalize(const Vec3D &vec3d) {
-  const auto vector_length = this->getVectorLength(vec3d);
+Vec3D Vec3D::normalize() {
+  const auto vector_length = this->getVectorLength();
 
   // avoid division by 0
   if (vector_length == 0)

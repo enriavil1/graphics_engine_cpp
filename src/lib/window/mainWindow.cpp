@@ -101,8 +101,8 @@ void MainWindow::process_events() {
         case GLFW_KEY_A:
           // camera.moveLeft();
           camera.turnLeft(elapsed_time);
-
           break;
+
         case GLFW_KEY_D:
           // camera.moveRight();
           camera.turnRight(elapsed_time);

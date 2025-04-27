@@ -4,6 +4,7 @@
 #include "imgui.h"
 
 #include <algorithm>
+#include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -29,13 +30,15 @@ void Engine::project(double theta) {
     return;
   }
 
+  const auto &window_pos = ImGui::GetWindowPos();
   auto camera_pos = Engine::getCamera().getPos();
+
   ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
   const float ASPECT_RATIO = ImGui::GetWindowHeight() / ImGui::GetWindowWidth();
 
   auto world_matrix = Matrix4x4::getWorldMatrix() *
-                      Matrix4x4::getTranslationMatrix(0.0f, 0.0f, 5.0f);
+                      Matrix4x4::getTranslationMatrix(0.0f, 0.0f, 20.0f);
 
   const auto &projection_matrix = Matrix4x4::getProjectionMatrix(ASPECT_RATIO);
   const auto &view_matrix = Engine::getCamera().getLookAtMatrix();
@@ -45,17 +48,15 @@ void Engine::project(double theta) {
   for (auto &tri : Engine::mp_projecting_obj->getMesh().triangles) {
     Triangle projected_triangle;
 
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < projected_triangle.points.size(); ++i) {
       projected_triangle.points[i] = tri.points[i] * world_matrix;
     }
 
     const auto normal = projected_triangle.getNormarl();
-    const double dot_product =
-        normal.getDotProduct(projected_triangle.points[0] - camera_pos);
 
-    if (dot_product < 0.0) {
+    if (normal.getDotProduct(projected_triangle.points[0] - camera_pos) < 0.0) {
 
-      for (int i = 0; i < 3; ++i) {
+      for (int i = 0; i < projected_triangle.points.size(); ++i) {
         projected_triangle.points[i] =
             (projected_triangle.points[i] * view_matrix) * projection_matrix;
 
@@ -86,8 +87,6 @@ void Engine::project(double theta) {
               return triangle_1_avg_z > triangle_2_avg_z;
             });
 
-  const auto &window_pos = ImGui::GetWindowPos();
-
   std::array<ImVec2, 3> drawing_points;
   for (auto &projected_triangle : triangles_to_draw) {
     for (int i = 0; i < projected_triangle.points.size(); ++i) {
@@ -112,13 +111,13 @@ void Engine::scaleTriangle(Triangle &triangle) {
 };
 
 void Engine::scaleVec2d(ImVec2 &point) {
-  point.x = (point.x + 1.0f) * ImGui::GetWindowWidth() * 0.5f;
-  point.y = (point.y + 1.0f) * ImGui::GetWindowHeight() * 0.5f;
+  point.x = (point.x + 1.0f) * (ImGui::GetWindowWidth() * 0.5f);
+  point.y = (point.y + 1.0f) * (ImGui::GetWindowHeight() * 0.5f);
 }
 
 void Engine::scaleVec2d(Vec3D &point) {
-  point.x = (point.x + 1.0f) * ImGui::GetWindowWidth() * 0.5f;
-  point.y = (point.y + 1.0f) * ImGui::GetWindowHeight() * 0.5f;
+  point.x = (point.x + 1.0f) * (ImGui::GetWindowWidth() * 0.5f);
+  point.y = (point.y + 1.0f) * (ImGui::GetWindowHeight() * 0.5f);
 }
 
 bool Engine::loadObject(std::string file_path) {
