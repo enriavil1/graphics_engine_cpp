@@ -12,8 +12,8 @@
 - OpenGL
 
 #### MacOS
-1. sh {project_path}/build.sh
-2. {project_path}/build/3d_engine_cpp
+1. Build: `sh {project_path}/build.sh`
+2. Run: `{project_path}/build/3d_engine_cpp`
 
 
 
