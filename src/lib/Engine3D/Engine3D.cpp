@@ -4,17 +4,19 @@
 #include "imgui.h"
 
 #include <algorithm>
+#include <cstdio>
 #include <fstream>
 #include <iostream>
-#include <ostream>
 #include <sstream>
 #include <string>
 #include <vector>
 
 using namespace engine3D;
 
+Camera &Engine::getCamera() { return Engine::mp_camera; }
+
 bool Engine::getProjectingObj(Object3D &obj) {
-  auto projecting_obj = Engine::p_projecting_obj.get();
+  auto projecting_obj = Engine::mp_projecting_obj.get();
   if (projecting_obj != nullptr) {
     obj = *projecting_obj;
     return true;
@@ -24,44 +26,43 @@ bool Engine::getProjectingObj(Object3D &obj) {
 }
 
 void Engine::project(double theta) {
-  if (Engine::p_projecting_obj == nullptr) {
+  if (Engine::mp_projecting_obj == nullptr) {
     return;
   }
+
+  const auto &window_pos = ImGui::GetWindowPos();
+  auto camera_pos = Engine::getCamera().getPos();
 
   ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
   const float ASPECT_RATIO = ImGui::GetWindowHeight() / ImGui::GetWindowWidth();
 
+  auto world_matrix = Matrix4x4::getWorldMatrix() *
+                      Matrix4x4::getTranslationMatrix(0.0f, 0.0f, 20.0f);
+
   const auto &projection_matrix = Matrix4x4::getProjectionMatrix(ASPECT_RATIO);
-  const auto &zx_rotation_matrix = Matrix4x4::getZXRotationMatrix(theta);
+  const auto &view_matrix = Engine::getCamera().getLookAtMatrix();
 
   std::vector<Triangle> triangles_to_draw;
 
-  for (auto &tri : Engine::p_projecting_obj->getMesh().triangles) {
-    Triangle zx_rotated_triangle, projected_triangle;
+  for (auto &tri : Engine::mp_projecting_obj->getMesh().triangles) {
+    Triangle projected_triangle;
 
-    for (int i = 0; i < 3; ++i) {
-      zx_rotated_triangle.points[i] = tri.points[i] * zx_rotation_matrix;
+    for (int i = 0; i < projected_triangle.points.size(); ++i) {
+      projected_triangle.points[i] = tri.points[i] * world_matrix;
     }
 
-    // offset the z axis
-    for (Vec3D &point : zx_rotated_triangle.points) {
-      point.z += 40.0f;
-    }
+    const auto normal = projected_triangle.getNormarl();
 
-    const auto normal = zx_rotated_triangle.getNormarl();
-    const double dot_product =
-        normal.x * (zx_rotated_triangle.points[0].x - Engine::camera.x) +
-        normal.y * (zx_rotated_triangle.points[0].y - Engine::camera.y) +
-        normal.z * (zx_rotated_triangle.points[0].z - Engine::camera.z);
-    if (dot_product < 0.0) {
+    if (normal.getDotProduct(projected_triangle.points[0] - camera_pos) < 0.0) {
 
-      projected_triangle.points[0] =
-          zx_rotated_triangle.points[0] * projection_matrix;
-      projected_triangle.points[1] =
-          zx_rotated_triangle.points[1] * projection_matrix;
-      projected_triangle.points[2] =
-          zx_rotated_triangle.points[2] * projection_matrix;
+      for (int i = 0; i < projected_triangle.points.size(); ++i) {
+        projected_triangle.points[i] =
+            (projected_triangle.points[i] * view_matrix) * projection_matrix;
+
+        projected_triangle.points[i] =
+            projected_triangle.points[i] / projected_triangle.points[i].w;
+      }
 
       // scale projection point
       Engine::scaleTriangle(projected_triangle);
@@ -81,11 +82,11 @@ void Engine::project(double theta) {
                 triangle_2_avg_z += point.z;
               }
               triangle_1_avg_z /= 3;
+              triangle_2_avg_z /= 3;
 
               return triangle_1_avg_z > triangle_2_avg_z;
             });
 
-  const auto &window_pos = ImGui::GetWindowPos();
   std::array<ImVec2, 3> drawing_points;
   for (auto &projected_triangle : triangles_to_draw) {
     for (int i = 0; i < projected_triangle.points.size(); ++i) {
@@ -105,10 +106,19 @@ void Engine::project(double theta) {
 
 void Engine::scaleTriangle(Triangle &triangle) {
   for (Vec3D &point : triangle.points) {
-    point.x = (point.x + 1.0f) * ImGui::GetWindowWidth() * 0.5f;
-    point.y = (point.y + 1.0f) * ImGui::GetWindowHeight() * 0.5f;
+    Engine::scaleVec2d(point);
   }
 };
+
+void Engine::scaleVec2d(ImVec2 &point) {
+  point.x = (point.x + 1.0f) * (ImGui::GetWindowWidth() * 0.5f);
+  point.y = (point.y + 1.0f) * (ImGui::GetWindowHeight() * 0.5f);
+}
+
+void Engine::scaleVec2d(Vec3D &point) {
+  point.x = (point.x + 1.0f) * (ImGui::GetWindowWidth() * 0.5f);
+  point.y = (point.y + 1.0f) * (ImGui::GetWindowHeight() * 0.5f);
+}
 
 bool Engine::loadObject(std::string file_path) {
   if (file_path.substr(file_path.find_last_of(".")) != ".obj") {
@@ -138,6 +148,7 @@ bool Engine::loadObject(std::string file_path) {
       case ' ': {
         Vec3D vertex;
         stream_line >> character >> vertex.x >> vertex.y >> vertex.z;
+
         vertices.push_back(vertex);
       } break;
       default:
@@ -197,8 +208,8 @@ bool Engine::loadObject(std::string file_path) {
   auto obj = std::make_shared<Object3D>(mesh_loaded, vertices.size(),
                                         file_name.c_str());
 
-  Engine::p_loaded_objects.push_back(obj);
-  Engine::p_projecting_obj = obj;
+  Engine::mp_loaded_objects.push_back(obj);
+  Engine::mp_projecting_obj = obj;
 
   return true;
 }

@@ -23,8 +23,14 @@ public:
   Matrix4x4 operator*(const Matrix4x4 &matrix);
 
   static const Matrix4x4 getProjectionMatrix(const float &aspect_ratio);
+  static const Matrix4x4 getYRotationMatrix(const float &theta);
   static const Matrix4x4 getZRotationMatrix(const float &theta);
   static const Matrix4x4 getXRotationMatrix(const float &theta);
   static const Matrix4x4 getZXRotationMatrix(const float &theta);
+  static const Matrix4x4 getTranslationMatrix(const double &x, const double &y,
+                                              const double &z);
+  static Matrix4x4 getWorldMatrix();
+
+  Matrix4x4 inverse();
 };
 }; // namespace engine3D

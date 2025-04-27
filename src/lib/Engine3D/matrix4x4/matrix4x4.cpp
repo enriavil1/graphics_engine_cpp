@@ -33,6 +33,33 @@ Matrix4x4 Matrix4x4::operator*(const Matrix4x4 &matrix) {
   return result;
 }
 
+Matrix4x4 Matrix4x4::getWorldMatrix() {
+  auto world_matrix = Matrix4x4();
+
+  world_matrix[0][0] = 1.0f;
+  world_matrix[1][1] = 1.0f;
+  world_matrix[2][2] = 1.0f;
+  world_matrix[3][3] = 1.0f;
+
+  return world_matrix;
+}
+
+const Matrix4x4 Matrix4x4::getTranslationMatrix(const double &x,
+                                                const double &y,
+                                                const double &z) {
+  Matrix4x4 translation_matrix;
+
+  translation_matrix[0][0] = 1.0f;
+  translation_matrix[1][1] = 1.0f;
+  translation_matrix[2][2] = 1.0f;
+  translation_matrix[3][0] = x;
+  translation_matrix[3][1] = y;
+  translation_matrix[3][2] = z;
+  translation_matrix[3][3] = 1.0f;
+
+  return translation_matrix;
+}
+
 const Matrix4x4 Matrix4x4::getProjectionMatrix(const float &aspect_ratio) {
   const float NEAR = 0.1f;
   const float FAR = 1000.0f;
@@ -50,8 +77,19 @@ const Matrix4x4 Matrix4x4::getProjectionMatrix(const float &aspect_ratio) {
   return projection_matrix;
 }
 
+const Matrix4x4 Matrix4x4::getYRotationMatrix(const float &theta) {
+  Matrix4x4 y_rotation_matrix;
+  y_rotation_matrix[0][0] = cosf(theta);
+  y_rotation_matrix[0][2] = sinf(theta);
+  y_rotation_matrix[1][1] = 1.0f;
+  y_rotation_matrix[2][0] = -sinf(theta);
+  y_rotation_matrix[2][2] = cosf(theta);
+  y_rotation_matrix[3][3] = 1.0f;
+
+  return y_rotation_matrix;
+}
+
 const Matrix4x4 Matrix4x4::getZRotationMatrix(const float &theta) {
-  // Matrix used for the rotation of the object
   Matrix4x4 z_rotation_matrix;
   z_rotation_matrix[0][0] = cosf(theta);
   z_rotation_matrix[0][1] = sinf(theta);
@@ -79,4 +117,37 @@ const Matrix4x4 Matrix4x4::getXRotationMatrix(const float &theta) {
 const Matrix4x4 Matrix4x4::getZXRotationMatrix(const float &theta) {
   return Matrix4x4::getZRotationMatrix(theta) *
          Matrix4x4::getXRotationMatrix(theta);
+}
+
+// Inverse only works with translation and rotation matrices
+Matrix4x4 Matrix4x4::inverse() {
+
+  Matrix4x4 inversed_matrix;
+  inversed_matrix[0][0] = this->m[0][0];
+  inversed_matrix[0][1] = this->m[1][0];
+  inversed_matrix[0][2] = this->m[2][0];
+  inversed_matrix[0][3] = 0.0f;
+
+  inversed_matrix[1][0] = this->m[0][1];
+  inversed_matrix[1][1] = this->m[1][1];
+  inversed_matrix[1][2] = this->m[2][1];
+  inversed_matrix[1][3] = 0.0f;
+
+  inversed_matrix[2][0] = this->m[0][2];
+  inversed_matrix[2][1] = this->m[1][2];
+  inversed_matrix[2][2] = this->m[2][2];
+  inversed_matrix[2][3] = 0.0f;
+
+  inversed_matrix[3][0] = -(this->m[3][0] * inversed_matrix[0][0] +
+                            this->m[3][1] * inversed_matrix[1][0] +
+                            this->m[3][2] * inversed_matrix[2][0]);
+  inversed_matrix[3][1] = -(this->m[3][0] * inversed_matrix[0][1] +
+                            this->m[3][1] * inversed_matrix[1][1] +
+                            this->m[3][2] * inversed_matrix[2][1]);
+  inversed_matrix[3][2] = -(this->m[3][0] * inversed_matrix[0][2] +
+                            this->m[3][1] * inversed_matrix[1][2] +
+                            this->m[3][2] * inversed_matrix[2][2]);
+  inversed_matrix[3][3] = 1.0f;
+
+  return inversed_matrix;
 }

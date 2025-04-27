@@ -1,4 +1,5 @@
 
+#include "GLFW/glfw3.h"
 #include "imgui.h"
 
 #include <imgui_impl_glfw.h>
@@ -6,8 +7,11 @@
 
 #include <iostream>
 #include <memory>
+#include <ostream>
 #include <unistd.h>
 #include <vector>
+
+#include "../../include/Engine3D/Engine3D.hpp"
 
 #include "../../include/window/drawPort.hpp"
 #include "../../include/window/fileDialog.hpp"
@@ -80,7 +84,45 @@ bool MainWindow::initialize() {
 
 void MainWindow::process_frame() {}
 
-void MainWindow::process_events() {}
+void MainWindow::process_events() {
+  glfwPollEvents();
+  glfwSetKeyCallback(
+      MainWindow::m_window,
+      [](GLFWwindow *window, int key, int scancode, int action, int mods) {
+        auto &camera = engine3D::Engine::getCamera();
+        const auto &elapsed_time = MainWindow::m_theta;
+        switch (key) {
+        case GLFW_KEY_W:
+          camera.moveForward(elapsed_time);
+          break;
+        case GLFW_KEY_S:
+          camera.moveBackwards(elapsed_time);
+          break;
+        case GLFW_KEY_A:
+          // camera.moveLeft();
+          camera.turnLeft(elapsed_time);
+          break;
+
+        case GLFW_KEY_D:
+          // camera.moveRight();
+          camera.turnRight(elapsed_time);
+          break;
+
+        case GLFW_KEY_UP:
+          camera.moveUp(elapsed_time);
+          break;
+        case GLFW_KEY_DOWN:
+          camera.moveDown(elapsed_time);
+          break;
+        case GLFW_KEY_LEFT:
+          camera.turnLeft(elapsed_time);
+          break;
+        case GLFW_KEY_RIGHT:
+          camera.turnRight(elapsed_time);
+          break;
+        }
+      });
+}
 
 void MainWindow::run() {
   auto &io = ImGui::GetIO();
@@ -91,7 +133,7 @@ void MainWindow::run() {
   std::vector<std::shared_ptr<Window>> windows = {draw_port, stats_port};
 
   while (!glfwWindowShouldClose(m_window)) {
-    glfwPollEvents();
+    MainWindow::process_events();
     if (glfwGetWindowAttrib(m_window, GLFW_ICONIFIED) != 0) {
       glfw_sleep(10);
       continue;

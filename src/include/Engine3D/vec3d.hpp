@@ -29,14 +29,18 @@ public:
 
   Vec3D operator*(const Vec3D &vec3d);
   Vec3D operator*(const Matrix4x4 &matrix);
+  Vec3D operator*(const float &num);
 
   Vec3D operator/(const Vec3D &vec3d);
+  Vec3D operator/(const float &num);
 
-  float getDotProduct(const Vec3D &vec3d);
-  float getVectorLength(const Vec3D &vec3d);
+  float getDotProduct(const Vec3D &vec3d) const;
+  float getDotProduct() const;
+
+  float getVectorLength();
 
   Vec3D getCrossProduct(const Vec3D &vec3d);
-  Vec3D normalize(const Vec3D &vec3d);
+  Vec3D normalize();
 };
 
 } // namespace engine3D
