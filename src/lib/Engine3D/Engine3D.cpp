@@ -4,7 +4,6 @@
 #include "imgui.h"
 
 #include <algorithm>
-#include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -38,12 +37,14 @@ void Engine::project(double theta) {
   const float ASPECT_RATIO = ImGui::GetWindowHeight() / ImGui::GetWindowWidth();
 
   auto world_matrix = Matrix4x4::getWorldMatrix() *
-                      Matrix4x4::getTranslationMatrix(0.0f, 0.0f, 20.0f);
+                      Matrix4x4::getTranslationMatrix(0.0f, 0.0f, 5.0f);
 
   const auto &projection_matrix = Matrix4x4::getProjectionMatrix(ASPECT_RATIO);
   const auto &view_matrix = Engine::getCamera().getLookAtMatrix();
 
   std::vector<Triangle> triangles_to_draw;
+
+  const auto &xy_inversion_vector = Vec3D(-1.0f, -1.0f, 0);
 
   for (auto &tri : Engine::mp_projecting_obj->getMesh().triangles) {
     Triangle projected_triangle;
@@ -61,7 +62,8 @@ void Engine::project(double theta) {
             (projected_triangle.points[i] * view_matrix) * projection_matrix;
 
         projected_triangle.points[i] =
-            projected_triangle.points[i] / projected_triangle.points[i].w;
+            (projected_triangle.points[i] / projected_triangle.points[i].w) *
+            xy_inversion_vector;
       }
 
       // scale projection point
