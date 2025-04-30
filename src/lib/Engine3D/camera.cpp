@@ -4,6 +4,12 @@
 
 using namespace engine3D;
 
+double Camera::getNear() { return this->p_near; }
+double Camera::getFar() { return this->p_far; }
+
+Vec3D Camera::getPos() { return this->p_position; }
+Vec3D Camera::getDirection() { return this->p_direction; }
+
 void Camera::moveUp(const double &theta) { this->p_position.y += STEP; }
 void Camera::moveDown(const double &theta) { this->p_position.y -= STEP; }
 
@@ -42,9 +48,6 @@ void Camera::turnRight(const double &theta) {
   auto y_rotation_matrix = Matrix4x4::getYRotationMatrix(this->p_y_rotation);
   this->p_direction = target * y_rotation_matrix;
 }
-
-Vec3D Camera::getPos() { return this->p_position; }
-Vec3D Camera::getDirection() { return this->p_direction; }
 
 Matrix4x4 Camera::getLookAtMatrix() {
   auto forward = this->p_direction.normalize();
