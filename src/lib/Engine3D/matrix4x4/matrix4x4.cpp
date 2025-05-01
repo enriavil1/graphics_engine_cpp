@@ -60,8 +60,8 @@ const Matrix4x4 Matrix4x4::getTranslationMatrix(const double &x,
   return translation_matrix;
 }
 
-const Matrix4x4 Matrix4x4::getProjectionMatrix(const float &aspect_ratio) {
-  const float NEAR = 0.1f;
+const Matrix4x4 Matrix4x4::getProjectionMatrix(const float &near,
+                                               const float &aspect_ratio) {
   const float FAR = 1000.0f;
   const float FOV = 90.0f;
   const float FOV_RAD = 1.0f / tanf(FOV * 0.5f / 180.0f * 3.1415f);
@@ -69,8 +69,8 @@ const Matrix4x4 Matrix4x4::getProjectionMatrix(const float &aspect_ratio) {
   Matrix4x4 projection_matrix;
   projection_matrix[0][0] = aspect_ratio * FOV_RAD;
   projection_matrix[1][1] = FOV_RAD;
-  projection_matrix[2][2] = FAR / (FAR - NEAR);
-  projection_matrix[3][2] = (-FAR * NEAR) / (FAR - NEAR);
+  projection_matrix[2][2] = FAR / (FAR - near);
+  projection_matrix[3][2] = (-FAR * near) / (FAR - near);
   projection_matrix[2][3] = 1.0f;
   projection_matrix[3][3] = 0.0f;
 

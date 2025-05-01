@@ -15,32 +15,34 @@ public:
   Vec3D() {};
   Vec3D(double x, double y, double z) : x(x), y(y), z(z) {};
 
-  ImVec4 getImVec4() { return ImVec4(this->x, this->y, this->z, this->w); }
+  ImVec4 getImVec4() const {
+    return ImVec4(this->x, this->y, this->z, this->w);
+  }
 
-  ImVec2 getImVec2(const ImVec2 &window_pos) {
+  ImVec2 getImVec2(const ImVec2 &window_pos) const {
     return ImVec2(this->x + window_pos.x, this->y + window_pos.y);
   }
 
-  ImVec2 getImVec2() { return ImVec2(this->x, this->y); };
+  ImVec2 getImVec2() const { return ImVec2(this->x, this->y); };
 
-  Vec3D operator+(const Vec3D &vec3d);
+  Vec3D operator+(const Vec3D &vec3d) const;
 
-  Vec3D operator-(const Vec3D &vec3d);
+  Vec3D operator-(const Vec3D &vec3d) const;
 
-  Vec3D operator*(const Vec3D &vec3d);
-  Vec3D operator*(const Matrix4x4 &matrix);
-  Vec3D operator*(const float &num);
+  Vec3D operator*(const Vec3D &vec3d) const;
+  Vec3D operator*(const Matrix4x4 &matrix) const;
+  Vec3D operator*(const float &num) const;
 
-  Vec3D operator/(const Vec3D &vec3d);
-  Vec3D operator/(const float &num);
+  Vec3D operator/(const Vec3D &vec3d) const;
+  Vec3D operator/(const float &num) const;
 
   float getDotProduct(const Vec3D &vec3d) const;
   float getDotProduct() const;
 
-  float getVectorLength();
+  float getVectorLength() const;
 
-  Vec3D getCrossProduct(const Vec3D &vec3d);
-  Vec3D normalize();
+  Vec3D getCrossProduct(const Vec3D &vec3d) const;
+  Vec3D normalize() const;
 };
 
 } // namespace engine3D

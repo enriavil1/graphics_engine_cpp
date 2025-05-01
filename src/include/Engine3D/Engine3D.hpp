@@ -6,7 +6,11 @@
 #include "triangle.hpp"
 #include "vec3d.hpp"
 
+#include <deque>
 #include <string>
+
+#define NEAR 0.1
+#define FAR 1.0
 
 namespace engine3D {
 
@@ -20,15 +24,27 @@ public:
 
   static Camera &getCamera();
 
+  static long getAmountOfTrianglesProjected();
+
 private:
   inline static std::vector<std::shared_ptr<Object3D>> mp_loaded_objects = {};
 
   inline static std::shared_ptr<Object3D> mp_projecting_obj = nullptr;
 
-  inline static Camera mp_camera = Camera();
+  inline static Camera mp_camera = Camera(NEAR, FAR);
+
+  inline static long mp_amount_of_triangles_projected = 0;
 
   static void multiplyVectorMatrix(const Vec3D &point, Vec3D &output,
                                    const Matrix4x4 &m);
+
+  static Vec3D getPlaneInterception(const Vec3D &point_on_plane,
+                                    const Vec3D &plane,
+                                    const Vec3D &start_of_line,
+                                    const Vec3D &end_of_line);
+  static int clipTriangle(const Vec3D &plane_a, const Vec3D &plane_b,
+                          const Triangle &triangle,
+                          std::deque<Triangle> &triangles_output);
 
   static void scaleTriangle(Triangle &triangle);
   static void scaleVec2d(ImVec2 &point);

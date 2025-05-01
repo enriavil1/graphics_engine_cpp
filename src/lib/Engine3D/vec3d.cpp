@@ -3,23 +3,23 @@
 
 using namespace engine3D;
 
-Vec3D Vec3D::operator+(const Vec3D &vec3d) {
+Vec3D Vec3D::operator+(const Vec3D &vec3d) const {
   return Vec3D(this->x + vec3d.x, this->y + vec3d.y, this->z + vec3d.z);
 }
 
-Vec3D Vec3D::operator-(const Vec3D &vec3d) {
+Vec3D Vec3D::operator-(const Vec3D &vec3d) const {
   return Vec3D(this->x - vec3d.x, this->y - vec3d.y, this->z - vec3d.z);
 }
 
-Vec3D Vec3D::operator*(const Vec3D &vec3d) {
+Vec3D Vec3D::operator*(const Vec3D &vec3d) const {
   return Vec3D(this->x * vec3d.x, this->y * vec3d.y, this->z * vec3d.z);
 }
 
-Vec3D Vec3D::operator*(const float &num) {
+Vec3D Vec3D::operator*(const float &num) const {
   return Vec3D(this->x * num, this->y * num, this->z * num);
 }
 
-Vec3D Vec3D::operator*(const Matrix4x4 &matrix) {
+Vec3D Vec3D::operator*(const Matrix4x4 &matrix) const {
   Vec3D output;
 
   output.x = this->x * matrix[0][0] + this->y * matrix[1][0] +
@@ -37,11 +37,11 @@ Vec3D Vec3D::operator*(const Matrix4x4 &matrix) {
   return output;
 }
 
-Vec3D Vec3D::operator/(const Vec3D &vec3d) {
+Vec3D Vec3D::operator/(const Vec3D &vec3d) const {
   return Vec3D(this->x / vec3d.x, this->y / vec3d.y, this->z / vec3d.z);
 }
 
-Vec3D Vec3D::operator/(const float &num) {
+Vec3D Vec3D::operator/(const float &num) const {
   return Vec3D(this->x / num, this->y / num, this->z / num);
 }
 
@@ -53,15 +53,15 @@ float Vec3D::getDotProduct() const {
   return this->x * this->x + this->y * this->y + this->z * this->z;
 }
 
-float Vec3D::getVectorLength() { return sqrtf(this->getDotProduct()); }
+float Vec3D::getVectorLength() const { return sqrtf(this->getDotProduct()); }
 
-Vec3D Vec3D::getCrossProduct(const Vec3D &vec3d) {
+Vec3D Vec3D::getCrossProduct(const Vec3D &vec3d) const {
   return Vec3D(this->y * vec3d.z - this->z * vec3d.y,
                this->z * vec3d.x - this->x * vec3d.z,
                this->x * vec3d.y - this->y * vec3d.x);
 }
 
-Vec3D Vec3D::normalize() {
+Vec3D Vec3D::normalize() const {
   const auto vector_length = this->getVectorLength();
 
   // avoid division by 0
