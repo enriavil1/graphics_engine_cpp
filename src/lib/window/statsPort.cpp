@@ -24,11 +24,19 @@ void StatsPort::run() {
       ImGui::NewLine();
 
       const auto &obj_name = obj.getObjectName();
+      const long &amount_of_triangles_projected =
+          engine3D::Engine::getAmountOfTrianglesProjected();
+
       ImGui::Text("Object Name: %s", obj_name.c_str());
-      ImGui::Text("Amount of triangles being projected: %zu",
+      ImGui::Text("Amount of triangles loaded: %ld",
                   obj.getMesh().triangles.size());
-      ImGui::Text("Amount of vertices being projected: %d",
-                  obj.getAmountOfVertices());
+      ImGui::Text("Amount of vertices loaded: %d", obj.getAmountOfVertices());
+      ImGui::NewLine();
+
+      ImGui::Text("Amount of triangles being projected: %ld",
+                  amount_of_triangles_projected);
+      ImGui::Text("Amount of vertices being projected: %ld",
+                  amount_of_triangles_projected * 3);
 
       ImGui::NewLine();
       ImGui::Checkbox("Toggle Object wire frame",

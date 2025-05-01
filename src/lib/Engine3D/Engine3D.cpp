@@ -5,7 +5,6 @@
 
 #include <algorithm>
 #include <array>
-#include <cstdio>
 #include <deque>
 #include <fstream>
 #include <iostream>
@@ -17,6 +16,10 @@
 using namespace engine3D;
 
 Camera &Engine::getCamera() { return Engine::mp_camera; }
+
+long Engine::getAmountOfTrianglesProjected() {
+  return Engine::mp_amount_of_triangles_projected;
+}
 
 bool Engine::getProjectingObj(Object3D &obj) {
   auto projecting_obj = Engine::mp_projecting_obj.get();
@@ -137,6 +140,8 @@ void Engine::project(double theta) {
               return (triangle_1_avg_z / 3) > (triangle_2_avg_z / 3);
             });
 
+  Engine::mp_amount_of_triangles_projected = clipped_triangles_to_draw.size();
+
   std::array<ImVec2, 3> drawing_points;
   for (auto &projected_triangle : clipped_triangles_to_draw) {
     for (int i = 0; i < projected_triangle.points.size(); ++i) {
@@ -150,6 +155,9 @@ void Engine::project(double theta) {
       draw_list->AddLine(drawing_points[0], drawing_points[1], IM_COL32_BLACK);
       draw_list->AddLine(drawing_points[0], drawing_points[2], IM_COL32_BLACK);
       draw_list->AddLine(drawing_points[1], drawing_points[2], IM_COL32_BLACK);
+      for (const auto &point : drawing_points) {
+        draw_list->AddCircleFilled(point, 5, IM_COL32(255, 0, 0, 255));
+      }
     }
   }
 };
@@ -253,23 +261,19 @@ int Engine::clipTriangle(const Vec3D &point_on_plane, const Vec3D &plane,
   }
 
   // we have two points outside the plane
-  if (inside_point_idx == 1) {
-    Triangle new_triangle;
+  Triangle new_triangle;
 
-    // we fill in the valid points
-    new_triangle.points[0] = *inside_points[0];
+  // we fill in the valid points
+  new_triangle.points[0] = *inside_points[0];
 
-    // we get the interception to the plane and set them as points
-    new_triangle.points[1] = Engine::getPlaneInterception(
-        point_on_plane, plane_normal, *inside_points[0], *outside_points[0]);
-    new_triangle.points[2] = Engine::getPlaneInterception(
-        point_on_plane, plane_normal, *inside_points[0], *outside_points[1]);
+  // we get the interception to the plane and set them as points
+  new_triangle.points[1] = Engine::getPlaneInterception(
+      point_on_plane, plane_normal, *inside_points[0], *outside_points[0]);
+  new_triangle.points[2] = Engine::getPlaneInterception(
+      point_on_plane, plane_normal, *inside_points[0], *outside_points[1]);
 
-    triangles_output.push_back(new_triangle);
-    return 1;
-  }
-
-  return 0;
+  triangles_output.push_back(new_triangle);
+  return 1;
 };
 
 void Engine::scaleTriangle(Triangle &triangle) {
