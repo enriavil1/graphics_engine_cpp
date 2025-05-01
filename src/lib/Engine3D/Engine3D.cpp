@@ -4,10 +4,14 @@
 #include "imgui.h"
 
 #include <algorithm>
+#include <array>
+#include <cstdio>
+#include <deque>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 using namespace engine3D;
@@ -47,8 +51,8 @@ void Engine::project(double theta) {
   const auto &xy_inversion_vector = Vec3D(-1.0f, -1.0f, 0);
 
   std::vector<Triangle> triangles_to_draw;
-
-  for (auto &tri : Engine::mp_projecting_obj->getMesh().triangles) {
+  std::deque<Triangle> clipped_triangles;
+  for (const auto &tri : Engine::mp_projecting_obj->getMesh().triangles) {
     Triangle projected_triangle;
 
     for (int i = 0; i < projected_triangle.points.size(); ++i) {
@@ -61,40 +65,80 @@ void Engine::project(double theta) {
 
       for (int i = 0; i < projected_triangle.points.size(); ++i) {
         projected_triangle.points[i] =
-            (projected_triangle.points[i] * view_matrix) * projection_matrix;
-
-        // clip against for z value
-
-        projected_triangle.points[i] =
-            (projected_triangle.points[i] / projected_triangle.points[i].w) *
-            xy_inversion_vector;
+            projected_triangle.points[i] * view_matrix;
       }
 
-      // scale projection point
-      Engine::scaleTriangle(projected_triangle);
-      triangles_to_draw.push_back(projected_triangle);
+      // clip after view matrix multiplaction for z value
+      Engine::clipTriangle(Vec3D(0.0f, 0.0f, Engine::getCamera().getNear()),
+                           Vec3D(0.0f, 0.0f, Engine::getCamera().getFar()),
+                           projected_triangle, clipped_triangles);
+
+      // we might have clipped triangles to project as well
+      for (auto &triangle : clipped_triangles) {
+
+        for (int i = 0; i < 3; ++i) {
+          triangle.points[i] = triangle.points[i] * projection_matrix;
+
+          triangle.points[i] =
+              (triangle.points[i] / triangle.points[i].w) * xy_inversion_vector;
+        }
+        // scale projection point
+        Engine::scaleTriangle(triangle);
+        triangles_to_draw.push_back(triangle);
+      }
+      clipped_triangles = {}; // flush clipped triangles since this in this step
+                              // should have a size of 1 or 2
     }
   }
 
-  std::sort(triangles_to_draw.begin(), triangles_to_draw.end(),
-            [](Triangle &triangle_1, Triangle &triangle_2) {
+  // pairs of points to a plane in the unit vector
+  std::array<std::pair<Vec3D, Vec3D>, 4> planes = {
+      // bottom most plane
+      std::make_pair(Vec3D(0, 0, 0), Vec3D(0, 1, 0)),
+      // top most plane
+      std::make_pair(Vec3D(0, ImGui::GetWindowHeight() - 1, 0),
+                     Vec3D(0, -1, 0)),
+
+      // left most plane
+      std::make_pair(Vec3D(0, 0, 0), Vec3D(1, 0, 0)),
+      // right most plane
+      std::make_pair(Vec3D(ImGui::GetWindowWidth() - 1, 0, 0), Vec3D(-1, 0, 0)),
+  };
+
+  std::deque<Triangle> clipped_triangles_to_draw;
+  for (const auto &triangle : triangles_to_draw) {
+    clipped_triangles_to_draw.push_back(triangle);
+  }
+
+  for (const auto &plane : planes) {
+    auto current_amount_to_clip = clipped_triangles_to_draw.size();
+    while (current_amount_to_clip > 0) {
+      current_amount_to_clip += Engine::clipTriangle(
+          plane.first, plane.second, clipped_triangles_to_draw.front(),
+          clipped_triangles_to_draw);
+      clipped_triangles_to_draw.pop_front();
+      --current_amount_to_clip;
+    }
+  }
+
+  // sort the triangles to draw from back to front
+  std::sort(clipped_triangles_to_draw.begin(), clipped_triangles_to_draw.end(),
+            [](const Triangle &triangle_1, const Triangle &triangle_2) {
               double triangle_1_avg_z = 0.0;
-              for (auto &point : triangle_1.points) {
+              for (const auto &point : triangle_1.points) {
                 triangle_1_avg_z += point.z;
               }
 
               double triangle_2_avg_z = 0.0;
-              for (auto &point : triangle_2.points) {
+              for (const auto &point : triangle_2.points) {
                 triangle_2_avg_z += point.z;
               }
-              triangle_1_avg_z /= 3;
-              triangle_2_avg_z /= 3;
 
-              return triangle_1_avg_z > triangle_2_avg_z;
+              return (triangle_1_avg_z / 3) > (triangle_2_avg_z / 3);
             });
 
   std::array<ImVec2, 3> drawing_points;
-  for (auto &projected_triangle : triangles_to_draw) {
+  for (auto &projected_triangle : clipped_triangles_to_draw) {
     for (int i = 0; i < projected_triangle.points.size(); ++i) {
       drawing_points[i] = projected_triangle.points[i].getImVec2(window_pos);
     }
@@ -139,67 +183,69 @@ Vec3D Engine::getPlaneInterception(
   float t = (point_on_plane_normal - start_of_line_interception) /
             (end_of_line_interception - start_of_line_interception);
 
-  const auto &line_from_start_to_end_point = end_of_line - start_of_line;
-  const auto &line_to_intersect = line_from_start_to_end_point * t;
+  const auto &line_from_start_to_end = end_of_line - start_of_line;
+  const auto &line_to_intersect = line_from_start_to_end * t;
 
   // return point of interception
+  // essentially mx+b
   return line_to_intersect + start_of_line;
 }
 
 int Engine::clipTriangle(const Vec3D &point_on_plane, const Vec3D &plane,
-                         Triangle &triangle,
-                         std::vector<Triangle> &triangles_output) {
+                         const Triangle &triangle,
+                         std::deque<Triangle> &triangles_output) {
 
   const auto &plane_normal = plane.normalize();
-  std::array<Vec3D, 2> inside_points;
+  const Vec3D *inside_points[2];
   int inside_point_idx = 0;
 
-  std::array<Vec3D, 2> outside_points;
+  const Vec3D *outside_points[2];
   int outside_point_idx = 0;
 
   for (const auto &point : triangle.points) {
 
     const auto &dst_from_point_to_plane =
-        plane_normal.getDotProduct(point) -
+        (plane_normal.getDotProduct(point)) -
         plane_normal.getDotProduct(point_on_plane);
 
     if (dst_from_point_to_plane >= 0) {
       // if all points are inside we just return the current triangle
-      if (inside_point_idx == 1) {
+      if (inside_point_idx == 2) {
         triangles_output.push_back(triangle);
-        return 1;
+        return 0;
       }
 
-      inside_points[inside_point_idx] = point;
+      inside_points[inside_point_idx] = &point;
       ++inside_point_idx;
     } else {
       // if all points are outside we just return
+      // and dont add this point back
       if (outside_point_idx == 2) {
         return 0;
       }
-      outside_points[outside_point_idx] = point;
+      outside_points[outside_point_idx] = &point;
       ++outside_point_idx;
     }
   }
 
   // we have two points inside and one outside
-  if (inside_point_idx == 1) {
+  if (inside_point_idx == 2) {
     Triangle new_triangle_1, new_triangle_2;
 
     // we fill in the valid points
-    new_triangle_1.points[0] = inside_points[0];
-    new_triangle_2.points[0] = inside_points[0];
+    new_triangle_1.points[0] = *inside_points[0];
 
-    new_triangle_1.points[1] = inside_points[1];
+    new_triangle_2.points[0] = *inside_points[1];
+    new_triangle_1.points[1] = *inside_points[1];
 
     const auto &new_point_1 = Engine::getPlaneInterception(
-        point_on_plane, plane_normal, inside_points[0], outside_points[0]);
+        point_on_plane, plane_normal, *inside_points[0], *outside_points[0]);
 
     new_triangle_1.points[2] = new_point_1;
     new_triangle_2.points[1] = new_point_1;
 
     new_triangle_2.points[2] = Engine::getPlaneInterception(
-        point_on_plane, plane_normal, inside_points[1], outside_points[0]);
+        point_on_plane, plane_normal, *inside_points[1], *outside_points[0]);
 
     triangles_output.push_back(new_triangle_1);
     triangles_output.push_back(new_triangle_2);
@@ -207,17 +253,17 @@ int Engine::clipTriangle(const Vec3D &point_on_plane, const Vec3D &plane,
   }
 
   // we have two points outside the plane
-  if (inside_point_idx == 0) {
+  if (inside_point_idx == 1) {
     Triangle new_triangle;
 
     // we fill in the valid points
-    new_triangle.points[0] = inside_points[0];
+    new_triangle.points[0] = *inside_points[0];
 
     // we get the interception to the plane and set them as points
     new_triangle.points[1] = Engine::getPlaneInterception(
-        point_on_plane, plane_normal, inside_points[0], outside_points[0]);
+        point_on_plane, plane_normal, *inside_points[0], *outside_points[0]);
     new_triangle.points[2] = Engine::getPlaneInterception(
-        point_on_plane, plane_normal, inside_points[0], outside_points[1]);
+        point_on_plane, plane_normal, *inside_points[0], *outside_points[1]);
 
     triangles_output.push_back(new_triangle);
     return 1;
