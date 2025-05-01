@@ -149,9 +149,9 @@ void Engine::project(double theta) {
     }
 
     draw_list->AddTriangleFilled(drawing_points[0], drawing_points[1],
-                                 drawing_points[2], IM_COL32_WHITE);
+                                 drawing_points[2], projected_triangle.color);
 
-    if (Engine::show_wire_frame) {
+    if (Engine::m_show_wire_frame) {
       draw_list->AddLine(drawing_points[0], drawing_points[1], IM_COL32_BLACK);
       draw_list->AddLine(drawing_points[0], drawing_points[2], IM_COL32_BLACK);
       draw_list->AddLine(drawing_points[1], drawing_points[2], IM_COL32_BLACK);
@@ -255,6 +255,14 @@ int Engine::clipTriangle(const Vec3D &point_on_plane, const Vec3D &plane,
     new_triangle_2.points[2] = Engine::getPlaneInterception(
         point_on_plane, plane_normal, inside_points[1], outside_points[0]);
 
+    if (Engine::m_show_triangle_clipping) {
+      const auto green = IM_COL32(0, 255, 0, 255);
+      const auto red = IM_COL32(255, 0, 0, 255);
+
+      new_triangle_1.color = green;
+      new_triangle_2.color = red;
+    }
+
     triangles_output.push_back(new_triangle_1);
     triangles_output.push_back(new_triangle_2);
     return 2;
@@ -272,6 +280,11 @@ int Engine::clipTriangle(const Vec3D &point_on_plane, const Vec3D &plane,
   new_triangle.points[2] = Engine::getPlaneInterception(
       point_on_plane, plane_normal, inside_points[0], outside_points[1]);
 
+  if (Engine::m_show_triangle_clipping) {
+    const auto blue = IM_COL32(0, 0, 255, 255);
+
+    new_triangle.color = blue;
+  }
   triangles_output.push_back(new_triangle);
   return 1;
 };
