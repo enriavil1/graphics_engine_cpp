@@ -39,8 +39,10 @@ void StatsPort::run() {
                   amount_of_triangles_projected * 3);
 
       ImGui::NewLine();
-      ImGui::Checkbox("Toggle Object wire frame",
-                      &engine3D::Engine::show_wire_frame);
+      ImGui::Checkbox("Toggle object wire frame",
+                      &engine3D::Engine::m_show_wire_frame);
+      ImGui::Checkbox("Toggle triangle clipping debug",
+                      &engine3D::Engine::m_show_triangle_clipping);
     }
 
     ImGui::End();

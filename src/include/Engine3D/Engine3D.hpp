@@ -16,7 +16,8 @@ namespace engine3D {
 
 class Engine {
 public:
-  inline static bool show_wire_frame = false;
+  inline static bool m_show_wire_frame = false;
+  inline static bool m_show_triangle_clipping = false;
 
   static void project(double theta);
   static bool loadObject(std::string file_path);

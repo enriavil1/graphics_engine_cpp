@@ -10,10 +10,12 @@ namespace engine3D {
 // TODO: Create cpp file for this
 class Triangle {
 public:
+  ImU32 color = IM_COL32_WHITE;
   std::array<Vec3D, 3> points;
 
   Triangle() {};
   Triangle(std::array<Vec3D, 3> points) : points(points) {};
+
   Vec3D getNormarl() {
     // A line is a length between two points
     Vec3D lineA = points[1] - points[0];
@@ -24,6 +26,7 @@ public:
     // normalize the normal
     return normal.normalize();
   };
+  ;
 };
 
 // TODO move to its own file and turn into a class
