@@ -2,6 +2,7 @@
 #include "imgui.h"
 
 #include <OpenGL/gl.h>
+#include <cstdio>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
@@ -78,6 +79,7 @@ bool MainWindow::initialize() {
   // Setup Platform/Renderer backends
   ImGui_ImplGlfw_InitForOpenGL(MainWindow::m_window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
+  glEnable(GL_CULL_FACE);
 
   return true;
 }
@@ -86,12 +88,20 @@ void MainWindow::process_frame() {}
 
 void MainWindow::process_events() {
   glfwPollEvents();
+  // glfwSetInputMode(MainWindow::m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+  glfwSetCursorPosCallback(MainWindow::m_window,
+                           [](GLFWwindow *window, double x_pos, double y_pos) {
+                             engine3D::Engine::getCamera().cameraTurn(
+                                 MainWindow::m_theta, x_pos, y_pos);
+                           });
   glfwSetKeyCallback(
       MainWindow::m_window,
       [](GLFWwindow *window, int key, int scancode, int action, int mods) {
         auto &camera = engine3D::Engine::getCamera();
         const auto &elapsed_time = MainWindow::m_theta;
         switch (key) {
+        // Moving keys
         case GLFW_KEY_W:
           camera.moveForward(elapsed_time);
           break;
@@ -99,20 +109,18 @@ void MainWindow::process_events() {
           camera.moveBackwards(elapsed_time);
           break;
         case GLFW_KEY_A:
-          // camera.moveLeft();
-          camera.turnLeft(elapsed_time);
+          camera.moveLeft(elapsed_time);
           break;
-
         case GLFW_KEY_D:
-          // camera.moveRight();
-          camera.turnRight(elapsed_time);
+          camera.moveRight(elapsed_time);
           break;
 
+        // turning keys
         case GLFW_KEY_UP:
-          camera.moveUp(elapsed_time);
+          camera.turnUp(elapsed_time);
           break;
         case GLFW_KEY_DOWN:
-          camera.moveDown(elapsed_time);
+          camera.turnDown(elapsed_time);
           break;
         case GLFW_KEY_LEFT:
           camera.turnLeft(elapsed_time);
