@@ -51,7 +51,7 @@ void Engine::project(double theta) {
   const auto &view_matrix = Engine::getCamera().getLookAtMatrix();
 
   // as we load the obj we have the vertecis inverted
-  const auto &xy_inversion_vector = Vec3D(-1.0f, -1.0f, 0);
+  const auto &xy_inversion_vector = Vec3D(-1.0f, -1.0f, 1.0f);
 
   std::vector<Triangle> triangles_to_draw;
   std::deque<Triangle> clipped_triangles;
@@ -156,7 +156,7 @@ void Engine::project(double theta) {
       draw_list->AddLine(drawing_points[0], drawing_points[2], IM_COL32_BLACK);
       draw_list->AddLine(drawing_points[1], drawing_points[2], IM_COL32_BLACK);
       for (const auto &point : drawing_points) {
-        draw_list->AddCircleFilled(point, 5, IM_COL32(255, 0, 0, 255));
+        draw_list->AddCircleFilled(point, 5, IM_COL32_BLACK);
       }
     }
   }
