@@ -42,7 +42,7 @@ private:
 
   const Vec3D p_target = Vec3D(0, 0, 1);
   // clamping to avoid freezing
-  const double p_max_rotation = 1.5;
+  const float p_max_rotation = 1.50f;
 
   double p_yaw = 0.0;
   double p_pitch = 0.0;
