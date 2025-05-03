@@ -12,61 +12,59 @@
 void DrawPort::processEvents() {
   // hide cursor and capture
   auto &io = ImGui::GetIO();
+  io.WantCaptureMouse = true;
+  io.WantCaptureKeyboard = true;
 
   // handle camera turning
   const auto &mouse_pos = ImGui::GetMousePos();
-  const auto &window_pos = ImGui::GetWindowPos();
-  engine3D::Engine::getCamera().cameraTurn(MainWindow::m_theta,
-                                           mouse_pos.x + window_pos.x,
-                                           mouse_pos.y + window_pos.y);
+  engine3D::Engine::getCamera().cameraTurn(MainWindow::m_theta, mouse_pos.x,
+                                           mouse_pos.y);
 
-  if (glfwGetKey(MainWindow::getWindow(), GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-    this->p_has_captured_mouse = false;
+  auto &camera = engine3D::Engine::getCamera();
+  const auto &elapsed_time = MainWindow::m_theta;
+
+  if (ImGui::IsKeyDown(ImGuiKey_Escape) || !ImGui::IsWindowFocused()) {
     glfwSetInputMode(MainWindow::getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    this->p_has_captured_mouse = false;
   }
 
-  // handle keyboard events
-  glfwSetKeyCallback(
-      MainWindow::getWindow(),
-      [](GLFWwindow *window, int key, int scancode, int action, int mods) {
-        auto &camera = engine3D::Engine::getCamera();
-        const auto &elapsed_time = MainWindow::m_theta;
-        switch (key) {
-        // Moving keys
-        case GLFW_KEY_W:
-          camera.moveForward(elapsed_time);
-          break;
-        case GLFW_KEY_S:
-          camera.moveBackwards(elapsed_time);
-          break;
-        case GLFW_KEY_A:
-          camera.moveLeft(elapsed_time);
-          break;
-        case GLFW_KEY_D:
-          camera.moveRight(elapsed_time);
-          break;
+  if (ImGui::IsKeyDown(ImGuiKey_W)) {
+    camera.moveForward(elapsed_time);
+  }
 
-        // turning keys
-        case GLFW_KEY_UP:
-          camera.turnUp(elapsed_time);
-          break;
-        case GLFW_KEY_DOWN:
-          camera.turnDown(elapsed_time);
-          break;
-        case GLFW_KEY_LEFT:
-          camera.turnLeft(elapsed_time);
-          break;
-        case GLFW_KEY_RIGHT:
-          camera.turnRight(elapsed_time);
-          break;
-        }
-      });
+  if (ImGui::IsKeyDown(ImGuiKey_S)) {
+    camera.moveBackwards(elapsed_time);
+  }
+
+  if (ImGui::IsKeyDown(ImGuiKey_A)) {
+    camera.moveLeft(elapsed_time);
+  }
+
+  if (ImGui::IsKeyDown(ImGuiKey_D)) {
+    camera.moveRight(elapsed_time);
+  }
+
+  if (ImGui::IsKeyDown(ImGuiKey_UpArrow)) {
+    camera.turnUp(elapsed_time);
+  }
+
+  if (ImGui::IsKeyDown(ImGuiKey_DownArrow)) {
+    camera.turnDown(elapsed_time);
+  }
+
+  if (ImGui::IsKeyDown(ImGuiKey_LeftArrow)) {
+    camera.turnLeft(elapsed_time);
+  }
+
+  if (ImGui::IsKeyDown(ImGuiKey_RightArrow)) {
+    camera.turnRight(elapsed_time);
+  }
 }
 
 void DrawPort::run() {
   const auto flags = ImGuiWindowFlags_NoCollapse;
 
-  const auto &io = ImGui::GetIO();
+  auto &io = ImGui::GetIO();
 
   ImGuiWindowClass window_class;
   window_class.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_AutoHideTabBar;
@@ -81,14 +79,14 @@ void DrawPort::run() {
                        GLFW_CURSOR_DISABLED);
 
       this->p_has_captured_mouse = true;
+
       const auto &mouse_pos = ImGui::GetMousePos();
       const auto &window_pos = ImGui::GetWindowPos();
       engine3D::Engine::getCamera().setMousePos(
-          ImVec2(mouse_pos.x + window_pos.x, mouse_pos.y + window_pos.y));
+          ImVec2(mouse_pos.x, mouse_pos.y));
     }
 
-    if (this->p_has_captured_mouse && ImGui::IsWindowHovered() &&
-        ImGui::IsWindowFocused()) {
+    if (this->p_has_captured_mouse) {
       this->processEvents();
     }
 
