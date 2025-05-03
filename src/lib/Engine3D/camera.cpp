@@ -1,7 +1,7 @@
 #include "../../include/Engine3D/camera.hpp"
 
 #define STEP 32.0f
-#define MOUSE_SPEED 0.005f
+#define MOUSE_SPEED 0.05f
 
 using namespace engine3D;
 
@@ -82,16 +82,24 @@ void Camera::cameraTurn(const double &theta, const double &new_cursor_x_pos,
   const auto &y_rotation_matrix =
       Matrix4x4::getYRotationMatrix(this->p_y_rotation);
 
-  this->p_direction = this->p_target * (x_rotation_matrix * y_rotation_matrix);
+  this->p_direction = this->p_target * (y_rotation_matrix * x_rotation_matrix);
 }
 
 Matrix4x4 Camera::getLookAtMatrix() {
   auto forward = this->p_direction.normalize();
 
-  auto right_vector = Vec3D(sinf(this->p_x_rotation - 3.14f / 2.0f), 0,
-                            cosf(this->p_x_rotation - 3.14f / 2.0f));
+  auto up_vector = Vec3D(0, 1, 0);
 
-  auto up_vector = forward.getCrossProduct(right_vector);
+  // if my direction is straight up/down
+  //  use z as the up vector
+  if (fabs(forward.getDotProduct(up_vector)) > 0.999f) {
+    up_vector = Vec3D(0, 0, 1);
+  }
+  const auto a = forward * forward.getDotProduct(up_vector);
+  up_vector = up_vector - a;
+  up_vector = up_vector.normalize();
+
+  const auto right_vector = up_vector.getCrossProduct(forward);
 
   Matrix4x4 point_at_matrix;
   point_at_matrix[0][0] = right_vector.x;

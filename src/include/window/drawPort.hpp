@@ -9,8 +9,12 @@ public:
   bool initialize() { return true; }
 
   void run();
+  void processEvents();
 
   // Override for safety since for now this should never be possible
   void set_is_running(const bool new_is_running) {};
   void toggle_is_running() {};
+
+private:
+  bool p_has_captured_mouse = false;
 };

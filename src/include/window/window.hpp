@@ -14,6 +14,7 @@ public:
 
   virtual bool initialize() = 0;
   virtual void run() = 0;
+  virtual void processEvents() = 0;
 
   void set_window_height(int height);
   void set_window_width(int width);
