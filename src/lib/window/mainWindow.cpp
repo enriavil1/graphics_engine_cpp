@@ -2,6 +2,7 @@
 #include "imgui.h"
 
 #include <OpenGL/gl.h>
+#include <cstdio>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
@@ -11,24 +12,24 @@
 #include <unistd.h>
 #include <vector>
 
-#include "../../include/Engine3D/Engine3D.hpp"
-
 #include "../../include/window/drawPort.hpp"
 #include "../../include/window/fileDialog.hpp"
 #include "../../include/window/mainWindow.hpp"
 #include "../../include/window/statsPort.hpp"
 
-GLFWwindow *MainWindow::m_window = nullptr;
+GLFWwindow *MainWindow::mp_window = nullptr;
 auto MainWindow::m_theta = 0.0;
 
-const auto MainWindow::m_width = 1280;
-const auto MainWindow::m_height = 720;
-const auto MainWindow::m_clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+const auto MainWindow::mp_width = 1280;
+const auto MainWindow::mp_height = 720;
+const auto MainWindow::mp_clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 void MainWindow::glfw_sleep(int milliseconds) { usleep(milliseconds * 1000); }
 void MainWindow::glfw_error_callback(int error, const char *description) {
   fprintf(stderr, "GLFW failed with error %d: %s\n", error, description);
 }
+
+GLFWwindow *MainWindow::getWindow() { return MainWindow::mp_window; }
 
 bool MainWindow::initialize() {
   glfwSetErrorCallback(glfw_error_callback);
@@ -49,16 +50,16 @@ bool MainWindow::initialize() {
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
   // Create window with graphics context
-  MainWindow::m_window =
-      glfwCreateWindow(MainWindow::m_width, MainWindow::m_height, "Main Window",
-                       nullptr, nullptr);
+  MainWindow::mp_window =
+      glfwCreateWindow(MainWindow::mp_width, MainWindow::mp_height,
+                       "Main Window", nullptr, nullptr);
 
-  if (MainWindow::m_window == nullptr) {
+  if (MainWindow::mp_window == nullptr) {
     std::cerr << "Failed to initialize window" << std::endl;
     return false;
   }
 
-  glfwMakeContextCurrent(MainWindow::m_window);
+  glfwMakeContextCurrent(MainWindow::mp_window);
   // Enable vsync
   glfwSwapInterval(1);
 
@@ -76,53 +77,16 @@ bool MainWindow::initialize() {
   ImGui::StyleColorsDark();
 
   // Setup Platform/Renderer backends
-  ImGui_ImplGlfw_InitForOpenGL(MainWindow::m_window, true);
+  ImGui_ImplGlfw_InitForOpenGL(MainWindow::mp_window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
+  glEnable(GL_CULL_FACE);
 
   return true;
 }
 
 void MainWindow::process_frame() {}
 
-void MainWindow::process_events() {
-  glfwPollEvents();
-  glfwSetKeyCallback(
-      MainWindow::m_window,
-      [](GLFWwindow *window, int key, int scancode, int action, int mods) {
-        auto &camera = engine3D::Engine::getCamera();
-        const auto &elapsed_time = MainWindow::m_theta;
-        switch (key) {
-        case GLFW_KEY_W:
-          camera.moveForward(elapsed_time);
-          break;
-        case GLFW_KEY_S:
-          camera.moveBackwards(elapsed_time);
-          break;
-        case GLFW_KEY_A:
-          // camera.moveLeft();
-          camera.turnLeft(elapsed_time);
-          break;
-
-        case GLFW_KEY_D:
-          // camera.moveRight();
-          camera.turnRight(elapsed_time);
-          break;
-
-        case GLFW_KEY_UP:
-          camera.moveUp(elapsed_time);
-          break;
-        case GLFW_KEY_DOWN:
-          camera.moveDown(elapsed_time);
-          break;
-        case GLFW_KEY_LEFT:
-          camera.turnLeft(elapsed_time);
-          break;
-        case GLFW_KEY_RIGHT:
-          camera.turnRight(elapsed_time);
-          break;
-        }
-      });
-}
+void MainWindow::process_events() {}
 
 void MainWindow::run() {
   auto &io = ImGui::GetIO();
@@ -132,9 +96,9 @@ void MainWindow::run() {
 
   std::vector<std::shared_ptr<Window>> windows = {draw_port, stats_port};
 
-  while (!glfwWindowShouldClose(m_window)) {
-    MainWindow::process_events();
-    if (glfwGetWindowAttrib(m_window, GLFW_ICONIFIED) != 0) {
+  while (!glfwWindowShouldClose(mp_window)) {
+    glfwPollEvents();
+    if (glfwGetWindowAttrib(mp_window, GLFW_ICONIFIED) != 0) {
       glfw_sleep(10);
       continue;
     }
@@ -147,8 +111,14 @@ void MainWindow::run() {
 
     if (ImGui::BeginMainMenuBar()) {
 
+      if (ImGui::IsKeyDown(ImGuiKey_ModCtrl) && ImGui::IsKeyDown(ImGuiKey_O)) {
+        FileDialog::m_selecting_files = true;
+      }
+
       if (ImGui::BeginMenu("File")) {
-        ImGui::MenuItem("Open...", "Ctrl+O", &FileDialog::m_selecting_files);
+
+        ImGui::MenuItem("Open...", "(Ctr/Cmd)+O",
+                        &FileDialog::m_selecting_files);
         ImGui::EndMenu();
       }
 
@@ -167,11 +137,11 @@ void MainWindow::run() {
     // Rendering
     ImGui::Render();
     int display_w, display_h;
-    glfwGetFramebufferSize(m_window, &display_w, &display_h);
+    glfwGetFramebufferSize(mp_window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
-    glClearColor(m_clear_color.x * m_clear_color.w,
-                 m_clear_color.y * m_clear_color.w,
-                 m_clear_color.z * m_clear_color.w, m_clear_color.w);
+    glClearColor(mp_clear_color.x * mp_clear_color.w,
+                 mp_clear_color.y * mp_clear_color.w,
+                 mp_clear_color.z * mp_clear_color.w, mp_clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -182,7 +152,7 @@ void MainWindow::run() {
       glfwMakeContextCurrent(backup_current_context);
     }
 
-    glfwSwapBuffers(m_window);
+    glfwSwapBuffers(mp_window);
   }
 
   // Cleanup
@@ -190,6 +160,6 @@ void MainWindow::run() {
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
 
-  glfwDestroyWindow(m_window);
+  glfwDestroyWindow(mp_window);
   glfwTerminate();
 }

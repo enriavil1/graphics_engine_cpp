@@ -105,10 +105,10 @@ const Matrix4x4 Matrix4x4::getXRotationMatrix(const float &theta) {
 
   Matrix4x4 x_rotation_matrix;
   x_rotation_matrix[0][0] = 1;
-  x_rotation_matrix[1][1] = cosf(theta * 0.5f);
-  x_rotation_matrix[1][2] = sinf(theta * 0.5f);
-  x_rotation_matrix[2][1] = -sinf(theta * 0.5f);
-  x_rotation_matrix[2][2] = cosf(theta * 0.5f);
+  x_rotation_matrix[1][1] = cosf(theta);
+  x_rotation_matrix[1][2] = sinf(theta);
+  x_rotation_matrix[2][1] = -sinf(theta);
+  x_rotation_matrix[2][2] = cosf(theta);
   x_rotation_matrix[3][3] = 1;
 
   return x_rotation_matrix;

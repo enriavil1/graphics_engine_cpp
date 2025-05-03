@@ -8,4 +8,6 @@ public:
   bool initialize();
 
   void run();
+
+  void processEvents() {};
 };
