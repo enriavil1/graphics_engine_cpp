@@ -112,18 +112,24 @@ void Engine::project(double theta) {
   for (const auto &triangle : triangles_to_draw) {
     clipped_triangles_to_draw.push_back(triangle);
   }
-
+  printf("Starting clipping\n");
   for (const auto &plane : planes) {
     auto current_amount_to_clip = clipped_triangles_to_draw.size();
     while (current_amount_to_clip > 0) {
+      printf("checking triangle: %f, %f, %f\n",
+             clipped_triangles_to_draw.front().points[0].x,
+             clipped_triangles_to_draw.front().points[0].y,
+             clipped_triangles_to_draw.front().points[0].z);
       current_amount_to_clip += Engine::clipTriangle(
           plane.first, plane.second, clipped_triangles_to_draw.front(),
           clipped_triangles_to_draw);
       clipped_triangles_to_draw.pop_front();
       --current_amount_to_clip;
+      std::cout << current_amount_to_clip << std::endl;
     }
   }
 
+  printf("Finished Clipping\n");
   // sort the triangles to draw from back to front
   std::sort(clipped_triangles_to_draw.begin(), clipped_triangles_to_draw.end(),
             [](const Triangle &triangle_1, const Triangle &triangle_2) {
@@ -212,12 +218,13 @@ int Engine::clipTriangle(const Vec3D &point_on_plane, const Vec3D &plane,
 
   for (const auto &point : triangle.points) {
 
-    const auto &dst_from_point_to_plane =
-        (plane_normal.getDotProduct(point)) -
+    const float &dst_from_point_to_plane =
+        plane_normal.getDotProduct(point) -
         plane_normal.getDotProduct(point_on_plane);
 
-    if (dst_from_point_to_plane >= 0) {
+    if (dst_from_point_to_plane >= -0.1) {
       // if all points are inside we just return the current triangle
+
       if (inside_point_idx == 2) {
         triangles_output.push_back(triangle);
         return 0;
@@ -228,6 +235,7 @@ int Engine::clipTriangle(const Vec3D &point_on_plane, const Vec3D &plane,
     } else {
       // if all points are outside we just return
       // and dont add this point back
+
       if (outside_point_idx == 2) {
         return 0;
       }

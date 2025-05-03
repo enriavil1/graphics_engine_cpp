@@ -36,9 +36,7 @@ void Camera::moveLeft(const double &theta) {
 }
 
 void Camera::turnLeft(const double &theta) {
-  this->p_yaw = std::min(
-      std::max(this->p_yaw - (STEP * 0.5f * theta), -this->p_max_rotation),
-      this->p_max_rotation);
+  this->p_yaw -= STEP * 0.5f * theta;
 
   const auto &y_rotation_matrix = Matrix4x4::getYRotationMatrix(this->p_yaw);
   this->p_direction = this->p_target * y_rotation_matrix;
@@ -52,9 +50,7 @@ void Camera::moveRight(const double &theta) {
 }
 
 void Camera::turnRight(const double &theta) {
-  this->p_yaw = std::min(
-      std::max(this->p_yaw + (STEP * 0.5f * theta), -this->p_max_rotation),
-      this->p_max_rotation);
+  this->p_yaw += STEP * 0.5f * theta;
 
   auto y_rotation_matrix = Matrix4x4::getYRotationMatrix(this->p_yaw);
   this->p_direction = this->p_target * y_rotation_matrix;
@@ -62,7 +58,7 @@ void Camera::turnRight(const double &theta) {
 
 void Camera::turnUp(const double &theta) {
   this->p_pitch = std::min(
-      std::max(this->p_pitch - (STEP * 0.5f * theta), -this->p_max_rotation),
+      std::max(this->p_pitch + (STEP * 0.5f * theta), -this->p_max_rotation),
       this->p_max_rotation);
 
   const auto &x_rotation_matrix = Matrix4x4::getXRotationMatrix(this->p_pitch);
@@ -97,10 +93,7 @@ void Camera::cameraTurn(const double &theta, const double &new_cursor_x_pos,
                this->p_max_rotation);
 
   // for the y rotation we rotate across the x axis
-  this->p_yaw =
-      std::min(std::max(this->p_yaw + (MOUSE_SPEED * theta * x_difference),
-                        -this->p_max_rotation),
-               this->p_max_rotation);
+  this->p_yaw += MOUSE_SPEED * theta * x_difference;
 
   const auto &x_rotation_matrix = Matrix4x4::getXRotationMatrix(this->p_pitch);
   const auto &y_rotation_matrix = Matrix4x4::getYRotationMatrix(this->p_yaw);
