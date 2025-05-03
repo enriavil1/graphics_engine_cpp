@@ -1,5 +1,4 @@
 #include "../../include/Engine3D/camera.hpp"
-#include <iostream>
 
 #define STEP 32.0f
 #define MOUSE_SPEED 0.5f
