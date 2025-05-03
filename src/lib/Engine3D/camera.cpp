@@ -107,10 +107,6 @@ void Camera::cameraTurn(const double &theta, const double &new_cursor_x_pos,
   const auto &y_rotation_matrix = Matrix4x4::getYRotationMatrix(this->p_yaw);
 
   this->p_direction = (this->p_target * y_rotation_matrix) * x_rotation_matrix;
-
-  std::cout << "Pitch: " << this->p_pitch << ", Yaw: " << this->p_yaw
-            << ", Dir: " << this->p_direction.x << ", " << this->p_direction.y
-            << ", " << this->p_direction.z << std::endl;
 }
 
 Matrix4x4 Camera::getLookAtMatrix() {
