@@ -112,24 +112,17 @@ void Engine::project(double theta) {
   for (const auto &triangle : triangles_to_draw) {
     clipped_triangles_to_draw.push_back(triangle);
   }
-  printf("Starting clipping\n");
   for (const auto &plane : planes) {
     auto current_amount_to_clip = clipped_triangles_to_draw.size();
     while (current_amount_to_clip > 0) {
-      printf("checking triangle: %f, %f, %f\n",
-             clipped_triangles_to_draw.front().points[0].x,
-             clipped_triangles_to_draw.front().points[0].y,
-             clipped_triangles_to_draw.front().points[0].z);
       current_amount_to_clip += Engine::clipTriangle(
           plane.first, plane.second, clipped_triangles_to_draw.front(),
           clipped_triangles_to_draw);
       clipped_triangles_to_draw.pop_front();
       --current_amount_to_clip;
-      std::cout << current_amount_to_clip << std::endl;
     }
   }
 
-  printf("Finished Clipping\n");
   // sort the triangles to draw from back to front
   std::sort(clipped_triangles_to_draw.begin(), clipped_triangles_to_draw.end(),
             [](const Triangle &triangle_1, const Triangle &triangle_2) {
