@@ -11,19 +11,19 @@
 
 void DrawPort::processEvents() {
   // hide cursor and capture
-  glfwSetInputMode(MainWindow::getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-  printf("here");
-
-  const auto &io = ImGui::GetIO();
+  auto &io = ImGui::GetIO();
 
   // handle camera turning
   const auto &mouse_pos = ImGui::GetMousePos();
   const auto &window_pos = ImGui::GetWindowPos();
-  engine3D::Engine::getCamera().cameraTurn(MainWindow::m_theta, mouse_pos.x,
-                                           mouse_pos.y);
+  engine3D::Engine::getCamera().cameraTurn(MainWindow::m_theta,
+                                           mouse_pos.x + window_pos.x,
+                                           mouse_pos.y + window_pos.y);
 
-  this->p_has_captured_mouse =
-      GLFW_PRESS != glfwGetKey(MainWindow::getWindow(), GLFW_KEY_ESCAPE);
+  if (glfwGetKey(MainWindow::getWindow(), GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+    this->p_has_captured_mouse = false;
+    glfwSetInputMode(MainWindow::getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+  }
 
   // handle keyboard events
   glfwSetKeyCallback(
@@ -72,11 +72,19 @@ void DrawPort::run() {
   window_class.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_AutoHideTabBar;
 
   ImGui::SetNextWindowClass(&window_class);
+
   if (ImGui::Begin(this->window_title, NULL, flags)) {
 
-    if (!this->p_has_captured_mouse) {
-      this->p_has_captured_mouse = ImGui::IsWindowHovered() &&
-                                   ImGui::IsMouseClicked(ImGuiMouseButton_Left);
+    if (!this->p_has_captured_mouse && ImGui::IsWindowHovered() &&
+        ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+      glfwSetInputMode(MainWindow::getWindow(), GLFW_CURSOR,
+                       GLFW_CURSOR_DISABLED);
+
+      this->p_has_captured_mouse = true;
+      const auto &mouse_pos = ImGui::GetMousePos();
+      const auto &window_pos = ImGui::GetWindowPos();
+      engine3D::Engine::getCamera().setMousePos(
+          ImVec2(mouse_pos.x + window_pos.x, mouse_pos.y + window_pos.y));
     }
 
     if (this->p_has_captured_mouse && ImGui::IsWindowHovered() &&

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "imgui.h"
 #include "matrix4x4/matrix4x4.hpp"
 #include "vec3d.hpp"
 
@@ -33,14 +34,18 @@ public:
   Vec3D getPos();
   Vec3D getDirection();
 
+  void setMousePos(ImVec2 mouse_pos);
+
 private:
   Vec3D p_position = Vec3D(0, 0, 0);
   Vec3D p_direction = Vec3D(0, 0, 1);
 
   const Vec3D p_target = Vec3D(0, 0, 1);
+  // clamping to avoid freezing
+  const double p_max_rotation = 1.5;
 
-  double p_y_rotation = 0.0;
-  double p_x_rotation = 0.0;
+  double p_yaw = 0.0;
+  double p_pitch = 0.0;
 
   double p_near = 0.1f;
   double p_far = 1.0f;

@@ -98,7 +98,6 @@ void MainWindow::run() {
 
   while (!glfwWindowShouldClose(mp_window)) {
     glfwPollEvents();
-    glfwSetInputMode(MainWindow::getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     if (glfwGetWindowAttrib(mp_window, GLFW_ICONIFIED) != 0) {
       glfw_sleep(10);
       continue;
@@ -112,8 +111,14 @@ void MainWindow::run() {
 
     if (ImGui::BeginMainMenuBar()) {
 
+      if (ImGui::IsKeyDown(ImGuiKey_ModCtrl) && ImGui::IsKeyDown(ImGuiKey_O)) {
+        FileDialog::m_selecting_files = true;
+      }
+
       if (ImGui::BeginMenu("File")) {
-        ImGui::MenuItem("Open...", "CMD+O", &FileDialog::m_selecting_files);
+
+        ImGui::MenuItem("Open...", "(Ctr/Cmd)+O",
+                        &FileDialog::m_selecting_files);
         ImGui::EndMenu();
       }
 
