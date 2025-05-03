@@ -112,7 +112,6 @@ void Engine::project(double theta) {
   for (const auto &triangle : triangles_to_draw) {
     clipped_triangles_to_draw.push_back(triangle);
   }
-
   for (const auto &plane : planes) {
     auto current_amount_to_clip = clipped_triangles_to_draw.size();
     while (current_amount_to_clip > 0) {
@@ -212,12 +211,13 @@ int Engine::clipTriangle(const Vec3D &point_on_plane, const Vec3D &plane,
 
   for (const auto &point : triangle.points) {
 
-    const auto &dst_from_point_to_plane =
-        (plane_normal.getDotProduct(point)) -
+    const float &dst_from_point_to_plane =
+        plane_normal.getDotProduct(point) -
         plane_normal.getDotProduct(point_on_plane);
 
-    if (dst_from_point_to_plane >= 0) {
+    if (dst_from_point_to_plane >= -0.1) {
       // if all points are inside we just return the current triangle
+
       if (inside_point_idx == 2) {
         triangles_output.push_back(triangle);
         return 0;
@@ -228,6 +228,7 @@ int Engine::clipTriangle(const Vec3D &point_on_plane, const Vec3D &plane,
     } else {
       // if all points are outside we just return
       // and dont add this point back
+
       if (outside_point_idx == 2) {
         return 0;
       }
