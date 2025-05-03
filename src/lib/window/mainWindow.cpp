@@ -97,6 +97,7 @@ void MainWindow::run() {
   std::vector<std::shared_ptr<Window>> windows = {draw_port, stats_port};
 
   while (!glfwWindowShouldClose(mp_window)) {
+    glfwPollEvents();
     glfwSetInputMode(MainWindow::getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     if (glfwGetWindowAttrib(mp_window, GLFW_ICONIFIED) != 0) {
       glfw_sleep(10);

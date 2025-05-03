@@ -4,12 +4,12 @@
 #include "../window/fileDialog.hpp"
 #include "../window/mainWindow.hpp"
 
+#include "GLFW/glfw3.h"
 #include "imgui.h"
 #include <cstdio>
 #include <iostream>
 
 void DrawPort::processEvents() {
-  glfwPollEvents();
   // hide cursor and capture
   glfwSetInputMode(MainWindow::getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   printf("here");
@@ -19,11 +19,11 @@ void DrawPort::processEvents() {
   // handle camera turning
   const auto &mouse_pos = ImGui::GetMousePos();
   const auto &window_pos = ImGui::GetWindowPos();
-  engine3D::Engine::getCamera().cameraTurn(MainWindow::m_theta,
-                                           mouse_pos.x + window_pos.x,
-                                           mouse_pos.y + window_pos.y);
+  engine3D::Engine::getCamera().cameraTurn(MainWindow::m_theta, mouse_pos.x,
+                                           mouse_pos.y);
 
-  this->p_has_captured_mouse = !ImGui::IsKeyPressed(ImGuiKey_Escape);
+  this->p_has_captured_mouse =
+      GLFW_PRESS != glfwGetKey(MainWindow::getWindow(), GLFW_KEY_ESCAPE);
 
   // handle keyboard events
   glfwSetKeyCallback(
@@ -74,8 +74,10 @@ void DrawPort::run() {
   ImGui::SetNextWindowClass(&window_class);
   if (ImGui::Begin(this->window_title, NULL, flags)) {
 
-    this->p_has_captured_mouse = ImGui::IsWindowHovered() &&
-                                 ImGui::IsMouseClicked(ImGuiMouseButton_Left);
+    if (!this->p_has_captured_mouse) {
+      this->p_has_captured_mouse = ImGui::IsWindowHovered() &&
+                                   ImGui::IsMouseClicked(ImGuiMouseButton_Left);
+    }
 
     if (this->p_has_captured_mouse && ImGui::IsWindowHovered() &&
         ImGui::IsWindowFocused()) {

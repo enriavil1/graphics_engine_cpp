@@ -1,7 +1,8 @@
 #include "../../include/Engine3D/camera.hpp"
+#include <cstdio>
 
 #define STEP 32.0f
-#define MOUSE_SPEED 0.05f
+#define MOUSE_SPEED 0.5f
 
 using namespace engine3D;
 
@@ -69,6 +70,8 @@ void Camera::turnDown(const double &theta) {
 
 void Camera::cameraTurn(const double &theta, const double &new_cursor_x_pos,
                         const double &new_cursor_y_pos) {
+  printf("before: %f, %f after: %f %f\n", this->p_x_cursor_prev_pos,
+         this->p_y_cursor_prev_pos, new_cursor_x_pos, new_cursor_y_pos);
   const auto x_difference = new_cursor_x_pos - this->p_x_cursor_prev_pos;
   this->p_x_cursor_prev_pos = new_cursor_x_pos;
   const auto y_difference = new_cursor_y_pos - this->p_y_cursor_prev_pos;
