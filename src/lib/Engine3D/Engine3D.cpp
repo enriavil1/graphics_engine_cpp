@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <deque>
 #include <fstream>
 #include <iostream>
@@ -67,6 +68,26 @@ void Engine::project(double theta) {
     if (normal.getDotProduct(projected_triangle.points[0] - camera_pos) < 0.0) {
 
       for (int i = 0; i < projected_triangle.points.size(); ++i) {
+        // TODO: Add proper light entity
+        // for now the camera view = light
+        auto light_direction = Engine::getCamera().getDirection().normalize() *
+                               xy_inversion_vector;
+        light_direction.z = std::fabs(light_direction.z);
+
+        auto point = projected_triangle.points[i].normalize();
+
+        auto light_level = 1.0f;
+
+        light_level = light_direction.getDotProduct(point);
+
+        printf("light direction: (%f, %f, %f) point: (%f, %f, %f) light level: "
+               "%f\n",
+               light_direction.x, light_direction.y, light_direction.z, point.x,
+               point.y, point.z, light_level);
+        const auto color = IM_COL32(255 * light_level, 255 * light_level,
+                                    255 * light_level, 255);
+        projected_triangle.colors[i] = color;
+
         projected_triangle.points[i] =
             projected_triangle.points[i] * view_matrix;
       }
@@ -147,8 +168,10 @@ void Engine::project(double theta) {
       drawing_points[i] = projected_triangle.points[i].getImVec2(window_pos);
     }
 
-    draw_list->AddTriangleFilled(drawing_points[0], drawing_points[1],
-                                 drawing_points[2], projected_triangle.color);
+    draw_list->AddTriangleFilledMultiColor(
+        drawing_points[0], drawing_points[1], drawing_points[2],
+        projected_triangle.colors[0], projected_triangle.colors[1],
+        projected_triangle.colors[2]);
 
     if (Engine::m_show_wire_frame) {
       draw_list->AddLine(drawing_points[0], drawing_points[1], IM_COL32_BLACK);
@@ -203,13 +226,15 @@ int Engine::clipTriangle(const Vec3D &point_on_plane, const Vec3D &plane,
                          std::deque<Triangle> &triangles_output) {
 
   const auto &plane_normal = plane.normalize();
-  Vec3D inside_points[2];
+  std::pair<Vec3D, ImU32> inside_points[2];
   int inside_point_idx = 0;
 
-  Vec3D outside_points[2];
+  std::pair<Vec3D, ImU32> outside_points[2];
   int outside_point_idx = 0;
 
-  for (const auto &point : triangle.points) {
+  for (int i = 0; i < 3; ++i) {
+    const auto &point = triangle.points[i];
+    const auto &color = triangle.colors[i];
 
     const float &dst_from_point_to_plane =
         plane_normal.getDotProduct(point) -
@@ -223,7 +248,7 @@ int Engine::clipTriangle(const Vec3D &point_on_plane, const Vec3D &plane,
         return 0;
       }
 
-      inside_points[inside_point_idx] = point;
+      inside_points[inside_point_idx] = std::make_pair(point, color);
       ++inside_point_idx;
     } else {
       // if all points are outside we just return
@@ -232,7 +257,7 @@ int Engine::clipTriangle(const Vec3D &point_on_plane, const Vec3D &plane,
       if (outside_point_idx == 2) {
         return 0;
       }
-      outside_points[outside_point_idx] = point;
+      outside_points[outside_point_idx] = std::make_pair(point, color);
       ++outside_point_idx;
     }
   }
@@ -242,26 +267,36 @@ int Engine::clipTriangle(const Vec3D &point_on_plane, const Vec3D &plane,
     Triangle new_triangle_1, new_triangle_2;
 
     // we fill in the valid points
-    new_triangle_1.points[0] = inside_points[0];
+    new_triangle_1.points[0] = inside_points[0].first;
 
-    new_triangle_2.points[0] = inside_points[1];
-    new_triangle_1.points[1] = inside_points[1];
+    new_triangle_2.points[0] = inside_points[1].first;
+    new_triangle_1.points[1] = inside_points[1].first;
 
     const auto &new_point_1 = Engine::getPlaneInterception(
-        point_on_plane, plane_normal, inside_points[0], outside_points[0]);
+        point_on_plane, plane_normal, inside_points[0].first,
+        outside_points[0].first);
 
     new_triangle_1.points[2] = new_point_1;
     new_triangle_2.points[1] = new_point_1;
 
     new_triangle_2.points[2] = Engine::getPlaneInterception(
-        point_on_plane, plane_normal, inside_points[1], outside_points[0]);
+        point_on_plane, plane_normal, inside_points[1].first,
+        outside_points[0].first);
+
+    new_triangle_1.colors[0] = inside_points[0].second;
+    new_triangle_1.colors[1] = inside_points[1].second;
+    new_triangle_1.colors[2] = outside_points[0].second;
+
+    new_triangle_2.colors[0] = inside_points[1].second;
+    new_triangle_2.colors[1] = outside_points[0].second;
+    new_triangle_2.colors[2] = outside_points[0].second;
 
     if (Engine::m_show_triangle_clipping) {
       const auto green = IM_COL32(0, 255, 0, 255);
       const auto red = IM_COL32(255, 0, 0, 255);
 
-      new_triangle_1.color = green;
-      new_triangle_2.color = red;
+      new_triangle_1.colors = {green, green, green};
+      new_triangle_2.colors = {red, red, red};
     }
 
     triangles_output.push_back(new_triangle_1);
@@ -273,18 +308,24 @@ int Engine::clipTriangle(const Vec3D &point_on_plane, const Vec3D &plane,
   Triangle new_triangle;
 
   // we fill in the valid points
-  new_triangle.points[0] = inside_points[0];
+  new_triangle.points[0] = inside_points[0].first;
 
   // we get the interception to the plane and set them as points
   new_triangle.points[1] = Engine::getPlaneInterception(
-      point_on_plane, plane_normal, inside_points[0], outside_points[0]);
+      point_on_plane, plane_normal, inside_points[0].first,
+      outside_points[0].first);
   new_triangle.points[2] = Engine::getPlaneInterception(
-      point_on_plane, plane_normal, inside_points[0], outside_points[1]);
+      point_on_plane, plane_normal, inside_points[0].first,
+      outside_points[1].first);
+
+  new_triangle.colors[0] = inside_points[0].second;
+  new_triangle.colors[1] = outside_points[0].second;
+  new_triangle.colors[2] = outside_points[1].second;
 
   if (Engine::m_show_triangle_clipping) {
     const auto blue = IM_COL32(0, 0, 255, 255);
 
-    new_triangle.color = blue;
+    new_triangle.colors = {blue, blue, blue};
   }
   triangles_output.push_back(new_triangle);
   return 1;
