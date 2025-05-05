@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstdio>
 #include <deque>
 #include <fstream>
 #include <iostream>
@@ -72,9 +73,15 @@ void Engine::project(double theta) {
         // for now the camera view = light
         auto light_direction = Engine::getCamera().getDirection().normalize();
 
-        auto point = (projected_triangle.points[i] - camera_pos).normalize();
+        // get the point based on the camera
+        auto point = projected_triangle.points[i] - camera_pos;
 
-        auto light_level = light_direction.getDotProduct(point) * 0.95f;
+        auto distance = 1.0f / std::fmax(point.getDotProduct(),
+                                         Engine::getCamera().getNear());
+
+        auto light_level =
+            (light_direction.getDotProduct(point.normalize()) * distance) * 5;
+        light_level = std::fmin(1.0f, std::fmax(light_level, 0.0f));
 
         const auto color = IM_COL32(255 * light_level, 255 * light_level,
                                     255 * light_level, 255);
