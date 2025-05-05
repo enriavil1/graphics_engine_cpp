@@ -47,7 +47,7 @@ private:
   double p_yaw = 0.0;
   double p_pitch = 0.0;
 
-  double p_near = 0.1f;
+  double p_near = 0.01f;
   double p_far = 1.0f;
 
   double p_x_cursor_prev_pos = 0.0;
