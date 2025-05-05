@@ -70,20 +70,12 @@ void Engine::project(double theta) {
       for (int i = 0; i < projected_triangle.points.size(); ++i) {
         // TODO: Add proper light entity
         // for now the camera view = light
-        auto light_direction = Engine::getCamera().getDirection().normalize() *
-                               xy_inversion_vector;
-        light_direction.z = std::fabs(light_direction.z);
+        auto light_direction = Engine::getCamera().getDirection().normalize();
 
-        auto point = projected_triangle.points[i].normalize();
+        auto point = (projected_triangle.points[i] - camera_pos).normalize();
 
-        auto light_level = 1.0f;
+        auto light_level = light_direction.getDotProduct(point) * 0.95f;
 
-        light_level = light_direction.getDotProduct(point);
-
-        printf("light direction: (%f, %f, %f) point: (%f, %f, %f) light level: "
-               "%f\n",
-               light_direction.x, light_direction.y, light_direction.z, point.x,
-               point.y, point.z, light_level);
         const auto color = IM_COL32(255 * light_level, 255 * light_level,
                                     255 * light_level, 255);
         projected_triangle.colors[i] = color;
