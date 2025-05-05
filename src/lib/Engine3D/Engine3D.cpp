@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <cstdio>
 #include <deque>
 #include <fstream>
 #include <iostream>
@@ -23,25 +22,17 @@ long Engine::getAmountOfTrianglesProjected() {
   return Engine::mp_amount_of_triangles_projected;
 }
 
-bool Engine::getProjectingObj(Object3D &obj) {
-  auto projecting_obj = Engine::mp_projecting_obj.get();
-  if (projecting_obj != nullptr) {
-    obj = *projecting_obj;
-    return true;
-  }
-
-  return false;
+bool Engine::getProjectingObjects(
+    std::vector<std::shared_ptr<Object3D>> &objects) {
+  objects = Engine::mp_loaded_objects;
+  return objects.size() > 0;
 }
 
-void Engine::project(double theta) {
-  if (Engine::mp_projecting_obj == nullptr) {
-    return;
-  }
+void Engine::project(std::vector<Triangle> &triangles_to_project,
+                     double theta) {
 
   const auto &window_pos = ImGui::GetWindowPos();
   auto camera_pos = Engine::getCamera().getPos();
-
-  ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
   const float ASPECT_RATIO = ImGui::GetWindowHeight() / ImGui::GetWindowWidth();
 
@@ -55,96 +46,112 @@ void Engine::project(double theta) {
   // as we load the obj we have the vertecis inverted
   const auto &xy_inversion_vector = Vec3D(-1.0f, -1.0f, 1.0f);
 
-  std::vector<Triangle> triangles_to_draw;
-  std::deque<Triangle> clipped_triangles;
-  for (const auto &tri : Engine::mp_projecting_obj->getMesh().triangles) {
-    Triangle projected_triangle;
+  // restart for stats
+  Engine::mp_amount_of_triangles_projected = 0;
 
-    for (int i = 0; i < projected_triangle.points.size(); ++i) {
-      projected_triangle.points[i] = tri.points[i] * world_matrix;
-    }
+  for (const auto &object : Engine::mp_loaded_objects) {
 
-    const auto normal = projected_triangle.getNormarl();
+    std::vector<Triangle> triangles_to_draw;
+    std::deque<Triangle> clipped_triangles;
 
-    if (normal.getDotProduct(projected_triangle.points[0] - camera_pos) < 0.0) {
+    for (const auto &tri : object->getMesh().triangles) {
+      Triangle projected_triangle;
 
       for (int i = 0; i < projected_triangle.points.size(); ++i) {
-        // TODO: Add proper light entity
-        // for now the camera view = light
-        auto light_direction = Engine::getCamera().getDirection().normalize();
-
-        // get the point based on the camera
-        auto point = projected_triangle.points[i] - camera_pos;
-
-        auto distance = 1.0f / std::fmax(point.getDotProduct(),
-                                         Engine::getCamera().getNear());
-
-        auto light_level =
-            (light_direction.getDotProduct(point.normalize()) * distance) * 5;
-        light_level = std::fmin(1.0f, std::fmax(light_level, 0.0f));
-
-        const auto color = IM_COL32(255 * light_level, 255 * light_level,
-                                    255 * light_level, 255);
-        projected_triangle.colors[i] = color;
-
-        projected_triangle.points[i] =
-            projected_triangle.points[i] * view_matrix;
+        projected_triangle.points[i] = tri.points[i] * world_matrix;
       }
 
-      // clip after view matrix multiplaction for z value
-      Engine::clipTriangle(Vec3D(0.0f, 0.0f, Engine::getCamera().getNear()),
-                           Vec3D(0.0f, 0.0f, Engine::getCamera().getFar()),
-                           projected_triangle, clipped_triangles);
+      const auto normal = projected_triangle.getNormarl();
 
-      // we might have clipped triangles to project as well
-      for (auto &triangle : clipped_triangles) {
+      if (normal.getDotProduct(projected_triangle.points[0] - camera_pos) <
+          0.0) {
 
-        for (int i = 0; i < 3; ++i) {
-          triangle.points[i] = triangle.points[i] * projection_matrix;
+        for (int i = 0; i < projected_triangle.points.size(); ++i) {
+          // TODO: Add proper light entity
+          // for now the camera view = light
+          auto light_direction = Engine::getCamera().getDirection().normalize();
 
-          triangle.points[i] =
-              (triangle.points[i] / triangle.points[i].w) * xy_inversion_vector;
+          // get the point based on the camera
+          auto point = projected_triangle.points[i] - camera_pos;
+
+          auto distance = 1.0f / std::fmax(point.getDotProduct(),
+                                           Engine::getCamera().getNear());
+
+          auto light_level =
+              (light_direction.getDotProduct(point.normalize()) * distance) * 5;
+          light_level = std::fmin(1.0f, std::fmax(light_level, 0.0f));
+
+          const auto color = IM_COL32(255 * light_level, 255 * light_level,
+                                      255 * light_level, 255);
+          projected_triangle.colors[i] = color;
+
+          projected_triangle.points[i] =
+              projected_triangle.points[i] * view_matrix;
         }
-        // scale projection point
-        Engine::scaleTriangle(triangle);
-        triangles_to_draw.push_back(triangle);
+
+        // clip after view matrix multiplaction for z value
+        Engine::clipTriangle(Vec3D(0.0f, 0.0f, Engine::getCamera().getNear()),
+                             Vec3D(0.0f, 0.0f, Engine::getCamera().getFar()),
+                             projected_triangle, clipped_triangles);
+
+        // we might have clipped triangles to project as well
+        for (auto &triangle : clipped_triangles) {
+
+          for (int i = 0; i < 3; ++i) {
+            triangle.points[i] = triangle.points[i] * projection_matrix;
+
+            triangle.points[i] = (triangle.points[i] / triangle.points[i].w) *
+                                 xy_inversion_vector;
+          }
+          // scale projection point
+          Engine::scaleTriangle(triangle);
+          triangles_to_draw.push_back(triangle);
+        }
+        clipped_triangles = {}; // flush clipped triangles since this in this
+                                // step should have a size of 1 or 2
       }
-      clipped_triangles = {}; // flush clipped triangles since this in this step
-                              // should have a size of 1 or 2
     }
-  }
 
-  // pairs of points to a plane in the unit vector
-  std::array<std::pair<Vec3D, Vec3D>, 4> planes = {
-      // bottom most plane
-      std::make_pair(Vec3D(0, 0, 0), Vec3D(0, 1, 0)),
-      // top most plane
-      std::make_pair(Vec3D(0, ImGui::GetWindowHeight() - 1, 0),
-                     Vec3D(0, -1, 0)),
+    // pairs of points to a plane in the unit vector
+    std::array<std::pair<Vec3D, Vec3D>, 4> planes = {
+        // bottom most plane
+        std::make_pair(Vec3D(0, 0, 0), Vec3D(0, 1, 0)),
+        // top most plane
+        std::make_pair(Vec3D(0, ImGui::GetWindowHeight() - 1, 0),
+                       Vec3D(0, -1, 0)),
 
-      // left most plane
-      std::make_pair(Vec3D(0, 0, 0), Vec3D(1, 0, 0)),
-      // right most plane
-      std::make_pair(Vec3D(ImGui::GetWindowWidth() - 1, 0, 0), Vec3D(-1, 0, 0)),
-  };
+        // left most plane
+        std::make_pair(Vec3D(0, 0, 0), Vec3D(1, 0, 0)),
+        // right most plane
+        std::make_pair(Vec3D(ImGui::GetWindowWidth() - 1, 0, 0),
+                       Vec3D(-1, 0, 0)),
+    };
 
-  std::deque<Triangle> clipped_triangles_to_draw;
-  for (const auto &triangle : triangles_to_draw) {
-    clipped_triangles_to_draw.push_back(triangle);
-  }
-  for (const auto &plane : planes) {
-    auto current_amount_to_clip = clipped_triangles_to_draw.size();
-    while (current_amount_to_clip > 0) {
-      current_amount_to_clip += Engine::clipTriangle(
-          plane.first, plane.second, clipped_triangles_to_draw.front(),
-          clipped_triangles_to_draw);
-      clipped_triangles_to_draw.pop_front();
-      --current_amount_to_clip;
+    std::deque<Triangle> clipped_triangles_to_draw;
+    for (const auto &triangle : triangles_to_draw) {
+      clipped_triangles_to_draw.push_back(triangle);
+    }
+    for (const auto &plane : planes) {
+      auto current_amount_to_clip = clipped_triangles_to_draw.size();
+      while (current_amount_to_clip > 0) {
+        current_amount_to_clip += Engine::clipTriangle(
+            plane.first, plane.second, clipped_triangles_to_draw.front(),
+            clipped_triangles_to_draw);
+        clipped_triangles_to_draw.pop_front();
+        --current_amount_to_clip;
+      }
+    }
+
+    Engine::mp_amount_of_triangles_projected +=
+        clipped_triangles_to_draw.size();
+
+    for (const auto &triangle : clipped_triangles_to_draw) {
+      triangles_to_project.push_back(triangle);
     }
   }
 
   // sort the triangles to draw from back to front
-  std::sort(clipped_triangles_to_draw.begin(), clipped_triangles_to_draw.end(),
+  std::sort(triangles_to_project.begin(), triangles_to_project.end(),
             [](const Triangle &triangle_1, const Triangle &triangle_2) {
               double triangle_1_avg_z = 0.0;
               for (const auto &point : triangle_1.points) {
@@ -158,29 +165,6 @@ void Engine::project(double theta) {
 
               return (triangle_1_avg_z / 3) > (triangle_2_avg_z / 3);
             });
-
-  Engine::mp_amount_of_triangles_projected = clipped_triangles_to_draw.size();
-
-  std::array<ImVec2, 3> drawing_points;
-  for (auto &projected_triangle : clipped_triangles_to_draw) {
-    for (int i = 0; i < projected_triangle.points.size(); ++i) {
-      drawing_points[i] = projected_triangle.points[i].getImVec2(window_pos);
-    }
-
-    draw_list->AddTriangleFilledMultiColor(
-        drawing_points[0], drawing_points[1], drawing_points[2],
-        projected_triangle.colors[0], projected_triangle.colors[1],
-        projected_triangle.colors[2]);
-
-    if (Engine::m_show_wire_frame) {
-      draw_list->AddLine(drawing_points[0], drawing_points[1], IM_COL32_BLACK);
-      draw_list->AddLine(drawing_points[0], drawing_points[2], IM_COL32_BLACK);
-      draw_list->AddLine(drawing_points[1], drawing_points[2], IM_COL32_BLACK);
-      for (const auto &point : drawing_points) {
-        draw_list->AddCircleFilled(point, 5, IM_COL32_BLACK);
-      }
-    }
-  }
 };
 
 Vec3D Engine::getPlaneInterception(
@@ -375,6 +359,9 @@ bool Engine::loadObject(std::string file_path) {
         Vec3D vertex;
         stream_line >> character >> vertex.x >> vertex.y >> vertex.z;
 
+        vertex = vertex + Engine::getCamera().getPos() +
+                 Engine::getCamera().getDirection();
+
         vertices.push_back(vertex);
       } break;
       default:
@@ -435,7 +422,6 @@ bool Engine::loadObject(std::string file_path) {
                                         file_name.c_str());
 
   Engine::mp_loaded_objects.push_back(obj);
-  Engine::mp_projecting_obj = obj;
 
   return true;
 }

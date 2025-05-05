@@ -8,6 +8,7 @@
 
 #include <deque>
 #include <string>
+#include <vector>
 
 #define NEAR 0.1
 #define FAR 1.0
@@ -19,9 +20,10 @@ public:
   inline static bool m_show_wire_frame = false;
   inline static bool m_show_triangle_clipping = false;
 
-  static void project(double theta);
+  static void project(std::vector<Triangle> &triangles_to_project,
+                      double theta);
   static bool loadObject(std::string file_path);
-  static bool getProjectingObj(Object3D &obj);
+  static bool getProjectingObjects(std::vector<std::shared_ptr<Object3D>> &obj);
 
   static Camera &getCamera();
 
@@ -29,8 +31,6 @@ public:
 
 private:
   inline static std::vector<std::shared_ptr<Object3D>> mp_loaded_objects = {};
-
-  inline static std::shared_ptr<Object3D> mp_projecting_obj = nullptr;
 
   inline static Camera mp_camera = Camera(NEAR, FAR);
 

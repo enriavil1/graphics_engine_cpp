@@ -13,8 +13,8 @@ public:
   Object3D(Mesh mesh, int amount_of_vertices, const char *name)
       : p_mesh(mesh), p_amount_of_vertices(amount_of_vertices), p_name(name) {};
 
-  int getAmountOfVertices();
-  Mesh getMesh();
-  const std::string &getObjectName();
+  int getAmountOfVertices() const;
+  Mesh getMesh() const;
+  const std::string &getObjectName() const;
 };
 } // namespace engine3D

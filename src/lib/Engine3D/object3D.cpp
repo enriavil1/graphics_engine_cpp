@@ -2,8 +2,7 @@
 
 using namespace engine3D;
 
-Mesh Object3D::getMesh() { return this->p_mesh; }
+Mesh Object3D::getMesh() const { return this->p_mesh; }
+int Object3D::getAmountOfVertices() const { return this->p_amount_of_vertices; }
 
-int Object3D::getAmountOfVertices() { return this->p_amount_of_vertices; }
-
-const std::string &Object3D::getObjectName() { return this->p_name; }
+const std::string &Object3D::getObjectName() const { return this->p_name; }

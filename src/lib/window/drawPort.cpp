@@ -9,6 +9,36 @@
 #include <cstdio>
 #include <iostream>
 
+void drawTriangles(const std::vector<engine3D::Triangle> &triangles_to_draw) {
+  if (triangles_to_draw.size() == 0) {
+    return;
+  }
+
+  ImDrawList *draw_list = ImGui::GetWindowDrawList();
+
+  std::array<ImVec2, 3> drawing_points;
+  for (auto &projected_triangle : triangles_to_draw) {
+    for (int i = 0; i < projected_triangle.points.size(); ++i) {
+      drawing_points[i] =
+          projected_triangle.points[i].getImVec2(ImGui::GetWindowPos());
+    }
+
+    draw_list->AddTriangleFilledMultiColor(
+        drawing_points[0], drawing_points[1], drawing_points[2],
+        projected_triangle.colors[0], projected_triangle.colors[1],
+        projected_triangle.colors[2]);
+
+    if (engine3D::Engine::m_show_wire_frame) {
+      draw_list->AddLine(drawing_points[0], drawing_points[1], IM_COL32_BLACK);
+      draw_list->AddLine(drawing_points[0], drawing_points[2], IM_COL32_BLACK);
+      draw_list->AddLine(drawing_points[1], drawing_points[2], IM_COL32_BLACK);
+      for (const auto &point : drawing_points) {
+        draw_list->AddCircleFilled(point, 5, IM_COL32_BLACK);
+      }
+    }
+  }
+}
+
 void DrawPort::processEvents() {
   // hide cursor and capture
   auto &io = ImGui::GetIO();
@@ -93,7 +123,11 @@ void DrawPort::run() {
     auto dt = 1.0f / io.Framerate;
     MainWindow::m_theta = dt;
 
-    engine3D::Engine::project(MainWindow::m_theta);
+    std::vector<engine3D::Triangle> triangles_to_draw;
+    engine3D::Engine::project(triangles_to_draw, MainWindow::m_theta);
+
+    drawTriangles(triangles_to_draw);
+
     ImGui::End();
   }
 
