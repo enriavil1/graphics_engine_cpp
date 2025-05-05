@@ -49,9 +49,7 @@ float Vec3D::getDotProduct(const Vec3D &vec3d) const {
   return this->x * vec3d.x + this->y * vec3d.y + this->z * vec3d.z;
 }
 
-float Vec3D::getDotProduct() const {
-  return this->x * this->x + this->y * this->y + this->z * this->z;
-}
+float Vec3D::getDotProduct() const { return this->getDotProduct(*this); }
 
 float Vec3D::getVectorLength() const { return sqrtf(this->getDotProduct()); }
 

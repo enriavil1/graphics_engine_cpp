@@ -10,7 +10,8 @@ namespace engine3D {
 // TODO: Create cpp file for this
 class Triangle {
 public:
-  ImU32 color = IM_COL32_WHITE;
+  std::array<ImU32, 3> colors = {IM_COL32_WHITE, IM_COL32_WHITE,
+                                 IM_COL32_WHITE};
   std::array<Vec3D, 3> points;
 
   Triangle() {};
