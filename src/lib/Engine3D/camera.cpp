@@ -1,7 +1,7 @@
 #include "../../include/Engine3D/camera.hpp"
 
-#define STEP 32.0f
-#define MOUSE_SPEED 0.5f
+#define STEP 8.0f
+#define MOUSE_SPEED 0.25f
 
 using namespace engine3D;
 
