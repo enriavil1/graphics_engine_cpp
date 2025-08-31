@@ -5,6 +5,14 @@
 
 using namespace engine3D;
 
+// Multiplies target by the x_matrix and y_matrix in a specific order to get
+// direction use this as safety to avoid messing up the order
+void multiplyForNewDirection(Vec3D &direction, const Vec3D &target,
+                             const Matrix4x4 &x_matrix,
+                             const Matrix4x4 &y_matrix) {
+  direction = target * (x_matrix * y_matrix);
+}
+
 const double Camera::getNear() const { return this->p_near; }
 const double Camera::getFar() const { return this->p_far; }
 
@@ -38,8 +46,11 @@ void Camera::moveLeft(const double &theta) {
 void Camera::turnLeft(const double &theta) {
   this->p_yaw -= STEP * 0.5f * theta;
 
+  const auto &x_rotation_matrix = Matrix4x4::getXRotationMatrix(this->p_pitch);
   const auto &y_rotation_matrix = Matrix4x4::getYRotationMatrix(this->p_yaw);
-  this->p_direction = this->p_target * y_rotation_matrix;
+
+  multiplyForNewDirection(this->p_direction, this->p_target, x_rotation_matrix,
+                          y_rotation_matrix);
 }
 
 void Camera::moveRight(const double &theta) {
@@ -52,26 +63,35 @@ void Camera::moveRight(const double &theta) {
 void Camera::turnRight(const double &theta) {
   this->p_yaw += STEP * 0.5f * theta;
 
-  auto y_rotation_matrix = Matrix4x4::getYRotationMatrix(this->p_yaw);
-  this->p_direction = this->p_target * y_rotation_matrix;
+  const auto &x_rotation_matrix = Matrix4x4::getXRotationMatrix(this->p_pitch);
+  const auto &y_rotation_matrix = Matrix4x4::getYRotationMatrix(this->p_yaw);
+
+  multiplyForNewDirection(this->p_direction, this->p_target, x_rotation_matrix,
+                          y_rotation_matrix);
 }
 
 void Camera::turnUp(const double &theta) {
+  this->p_pitch = std::fmin(
+      std::fmax(this->p_pitch - (STEP * 0.5f * theta), -this->p_max_rotation),
+      this->p_max_rotation);
+
+  const auto &x_rotation_matrix = Matrix4x4::getXRotationMatrix(this->p_pitch);
+  const auto &y_rotation_matrix = Matrix4x4::getYRotationMatrix(this->p_yaw);
+
+  multiplyForNewDirection(this->p_direction, this->p_target, x_rotation_matrix,
+                          y_rotation_matrix);
+}
+
+void Camera::turnDown(const double &theta) {
   this->p_pitch = std::fmin(
       std::fmax(this->p_pitch + (STEP * 0.5f * theta), -this->p_max_rotation),
       this->p_max_rotation);
 
   const auto &x_rotation_matrix = Matrix4x4::getXRotationMatrix(this->p_pitch);
-  this->p_direction = this->p_target * x_rotation_matrix;
-}
+  const auto &y_rotation_matrix = Matrix4x4::getYRotationMatrix(this->p_yaw);
 
-void Camera::turnDown(const double &theta) {
-  this->p_pitch = std::fmin(
-      std::fmax(this->p_pitch - (STEP * 0.5f * theta), -this->p_max_rotation),
-      this->p_max_rotation);
-
-  auto x_rotation_matrix = Matrix4x4::getXRotationMatrix(this->p_pitch);
-  this->p_direction = this->p_target * x_rotation_matrix;
+  multiplyForNewDirection(this->p_direction, this->p_target, x_rotation_matrix,
+                          y_rotation_matrix);
 }
 
 void Camera::cameraTurn(const double &theta, const double &new_cursor_x_pos,
@@ -98,7 +118,8 @@ void Camera::cameraTurn(const double &theta, const double &new_cursor_x_pos,
   const auto &x_rotation_matrix = Matrix4x4::getXRotationMatrix(this->p_pitch);
   const auto &y_rotation_matrix = Matrix4x4::getYRotationMatrix(this->p_yaw);
 
-  this->p_direction = this->p_target * (x_rotation_matrix * y_rotation_matrix);
+  multiplyForNewDirection(this->p_direction, this->p_target, x_rotation_matrix,
+                          y_rotation_matrix);
 }
 
 const Matrix4x4 Camera::getLookAtMatrix() const {
