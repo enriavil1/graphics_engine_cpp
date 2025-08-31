@@ -32,12 +32,12 @@ void Engine::project(std::vector<Triangle> &triangles_to_project,
                      double theta) {
 
   const auto &window_pos = ImGui::GetWindowPos();
-  auto camera_pos = Engine::getCamera().getPos();
+  const auto camera_pos = Engine::getCamera().getPos();
 
   const float ASPECT_RATIO = ImGui::GetWindowHeight() / ImGui::GetWindowWidth();
 
-  auto world_matrix = Matrix4x4::getWorldMatrix() *
-                      Matrix4x4::getTranslationMatrix(0.0f, 0.0f, 5.0f);
+  const auto world_matrix = Matrix4x4::getWorldMatrix() *
+                            Matrix4x4::getTranslationMatrix(0.0f, 0.0f, 5.0f);
 
   const auto &projection_matrix = Matrix4x4::getProjectionMatrix(
       Engine::getCamera().getNear(), ASPECT_RATIO);
@@ -61,7 +61,7 @@ void Engine::project(std::vector<Triangle> &triangles_to_project,
         projected_triangle.points[i] = tri.points[i] * world_matrix;
       }
 
-      const auto normal = projected_triangle.getNormarl();
+      const auto &normal = projected_triangle.getNormarl();
 
       if (normal.getDotProduct(projected_triangle.points[0] - camera_pos) <
           0.0) {
@@ -69,17 +69,21 @@ void Engine::project(std::vector<Triangle> &triangles_to_project,
         for (int i = 0; i < projected_triangle.points.size(); ++i) {
           // TODO: Add proper light entity
           // for now the camera view = light
-          auto light_direction = Engine::getCamera().getDirection().normalize();
+          const auto light_direction =
+              Engine::getCamera().getDirection().normalize();
 
           // get the point based on the camera
-          auto point = projected_triangle.points[i] - camera_pos;
+          const auto point = projected_triangle.points[i] - camera_pos;
 
-          auto distance = 1.0f / std::fmax(point.getDotProduct(),
-                                           Engine::getCamera().getNear());
+          const auto distance = 1.0f / std::fmax(point.getDotProduct(),
+                                                 Engine::getCamera().getNear());
 
-          auto light_level =
-              (light_direction.getDotProduct(point.normalize()) * distance) * 5;
-          light_level = std::fmin(1.0f, std::fmax(light_level, 0.0f));
+          const auto light_level = std::fmin(
+              1.0f,
+              std::fmax((light_direction.getDotProduct(point.normalize()) *
+                         distance) *
+                            5,
+                        0.0f));
 
           const auto color = IM_COL32(255 * light_level, 255 * light_level,
                                       255 * light_level, 255);
@@ -167,9 +171,12 @@ void Engine::project(std::vector<Triangle> &triangles_to_project,
             });
 };
 
-Vec3D Engine::getPlaneInterception(
-    const Vec3D &point_on_plane, const Vec3D &plane, const Vec3D &start_of_line,
-    const Vec3D &end_of_line) { // for safety normalize the plane
+Vec3D Engine::getPlaneInterception(const Vec3D &point_on_plane,
+                                   const Vec3D &plane,
+                                   const Vec3D &start_of_line,
+                                   const Vec3D &end_of_line) {
+
+  // for safety normalize the plane
   const auto &plane_normal = plane.normalize();
   const auto &point_on_plane_normal =
       plane_normal.getDotProduct(point_on_plane);

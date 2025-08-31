@@ -31,6 +31,10 @@ void StatsPort::run() {
 
       const long &amount_of_triangles_projected =
           engine3D::Engine::getAmountOfTrianglesProjected();
+      const auto &camera_pos = engine3D::Engine::getCamera().getPos();
+
+      ImGui::Text("Camera Position: (X:%f, Y:%f, Z:%f)", camera_pos.x,
+                  camera_pos.y, camera_pos.z);
 
       ImGui::Text("Amount of triangles loaded: %ld",
                   amount_of_triangles_loaded);
