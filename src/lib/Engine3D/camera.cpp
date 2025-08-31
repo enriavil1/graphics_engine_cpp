@@ -123,7 +123,7 @@ void Camera::cameraTurn(const double &theta, const double &new_cursor_x_pos,
 }
 
 const Matrix4x4 Camera::getLookAtMatrix() const {
-  auto forward = this->p_direction.normalize();
+  const auto &forward = this->p_direction.normalize();
 
   auto up_vector = Vec3D(0, 1, 0);
 
@@ -137,7 +137,7 @@ const Matrix4x4 Camera::getLookAtMatrix() const {
   up_vector = up_vector - a;
   up_vector = up_vector.normalize();
 
-  const auto right_vector = up_vector.getCrossProduct(forward);
+  const auto &right_vector = up_vector.getCrossProduct(forward);
 
   Matrix4x4 point_at_matrix;
   point_at_matrix[0][0] = right_vector.x;
