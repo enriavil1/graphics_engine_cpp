@@ -26,13 +26,13 @@ public:
   void cameraTurn(const double &theta, const double &new_cursor_x_pos,
                   const double &new_cursor_y_pos);
 
-  Matrix4x4 getLookAtMatrix();
+  const Matrix4x4 getLookAtMatrix() const;
 
-  double getNear();
-  double getFar();
+  const double getNear() const;
+  const double getFar() const;
 
-  Vec3D getPos();
-  Vec3D getDirection();
+  const Vec3D getPos() const;
+  const Vec3D getDirection() const;
 
   void setMousePos(ImVec2 mouse_pos);
 

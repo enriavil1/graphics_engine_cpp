@@ -5,11 +5,11 @@
 
 using namespace engine3D;
 
-double Camera::getNear() { return this->p_near; }
-double Camera::getFar() { return this->p_far; }
+const double Camera::getNear() const { return this->p_near; }
+const double Camera::getFar() const { return this->p_far; }
 
-Vec3D Camera::getPos() { return this->p_position; }
-Vec3D Camera::getDirection() { return this->p_direction; }
+const Vec3D Camera::getPos() const { return this->p_position; }
+const Vec3D Camera::getDirection() const { return this->p_direction; }
 
 void Camera::setMousePos(ImVec2 mouse_pos) {
   this->p_x_cursor_prev_pos = mouse_pos.x;
@@ -101,7 +101,7 @@ void Camera::cameraTurn(const double &theta, const double &new_cursor_x_pos,
   this->p_direction = this->p_target * (x_rotation_matrix * y_rotation_matrix);
 }
 
-Matrix4x4 Camera::getLookAtMatrix() {
+const Matrix4x4 Camera::getLookAtMatrix() const {
   auto forward = this->p_direction.normalize();
 
   auto up_vector = Vec3D(0, 1, 0);
